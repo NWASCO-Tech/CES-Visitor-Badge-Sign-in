@@ -380,6 +380,7 @@
         startingCamera: "Starting camera...",
         missingPhoto: "Missing photo. Please retake the picture.",
         creatingBadge: "Creating badge...",
+        printingBadge: "Printing badge...",
         done: "Done. Please check in with the secretary.",
         stillWorking: "Still working... badge creation can take a little longer.",
         cameraBlocked: "Camera access was blocked. Allow camera access for this site, then reload the page.",
@@ -409,6 +410,7 @@
         startingCamera: "Iniciando cámara...",
         missingPhoto: "Falta la foto. Vuelva a tomarla.",
         creatingBadge: "Creando gafete...",
+        printingBadge: "Imprimiendo gafete...",
         done: "Listo. Por favor pase con la secretaria.",
         stillWorking: "Todavía trabajando... la creación del gafete puede tardar un poco más.",
         cameraBlocked: "El acceso a la cámara fue bloqueado. Permita la cámara para este sitio y vuelva a cargar la página.",
@@ -607,7 +609,7 @@
       setStatus(tr("done"));
       setTimeout(() => {
         location.reload();
-      }, 1500);
+      }, 2000);
     }
 
     function finishError(message) {
@@ -617,6 +619,40 @@
       isSubmitting = false;
       signInBtn.disabled = false;
       retakeBtn.disabled = false;
+    }
+
+    function printBadgeDirectly(badgeHtml) {
+      setStatus(tr("printingBadge"));
+
+      let printFrame = document.getElementById("silentPrintFrame");
+      if (!printFrame) {
+        printFrame = document.createElement("iframe");
+        printFrame.id = "silentPrintFrame";
+        printFrame.style.position = "fixed";
+        printFrame.style.right = "0";
+        printFrame.style.bottom = "0";
+        printFrame.style.width = "0px";
+        printFrame.style.height = "0px";
+        printFrame.style.border = "0";
+        document.body.appendChild(printFrame);
+      }
+
+      const doc = printFrame.contentWindow.document;
+      doc.open();
+      doc.write(badgeHtml);
+      doc.close();
+
+      printFrame.contentWindow.onload = () => {
+        setTimeout(() => {
+          try {
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+          } catch (e) {
+            console.error("Print command failed:", e);
+          }
+          finishSuccess();
+        }, 300);
+      };
     }
 
     function submitVisit() {
@@ -657,7 +693,11 @@
 
     function handleServerResponse(data) {
       if (data.ok) {
-        finishSuccess();
+        if (data.badgeHtml) {
+          printBadgeDirectly(data.badgeHtml);
+        } else {
+          finishSuccess();
+        }
       } else {
         finishError(data.error);
       }
@@ -665,7 +705,10 @@
 
     window.addEventListener("message", (event) => {
       try {
-        const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        let data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        if (typeof data === "string") {
+          data = JSON.parse(data);
+        }
         if (!data || typeof data.ok === "undefined") return;
         handleServerResponse(data);
       } catch (err) {
