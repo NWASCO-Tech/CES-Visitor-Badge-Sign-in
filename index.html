@@ -1,814 +1,1619 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>NWASCO Visitor Sign-In</title>
 
-  <style>
-    :root {
-      --bg: #f3f4f6;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #555;
-      --border: #d0d7de;
-      --primary: #003865;
-      --secondary: #e5e7eb;
-      --notice-bg: #fff7ed;
-      --notice-border: #fed7aa;
-      --notice-text: #7c2d12;
-      --hint-bg: #eff6ff;
-      --hint-border: #bfdbfe;
-      --hint-text: #1e3a8a;
-      --error-bg: #fef2f2;
-      --error-border: #fecaca;
-      --error-text: #991b1b;
-      --shadow: 0 12px 35px rgba(0,0,0,.08);
-    }
+<meta charset="UTF-8">
 
-    * { box-sizing: border-box; }
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
 
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: system-ui, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
+<title>Visitor Sign-In</title>
 
-    .wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
+<style>
 
-    .card {
-      width: 100%;
-      max-width: 950px;
-      min-height: 92vh;
-      background: var(--card);
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+* {
+  box-sizing: border-box;
+}
 
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      text-align: left;
-      flex-shrink: 0;
-    }
+html,
+body {
 
-    .logo {
-      height: 82px;
-      width: auto;
-      object-fit: contain;
-      background: #fff;
-      padding: 6px;
-      border-radius: 10px;
-      border: 1px solid #eef0f3;
-      flex-shrink: 0;
-    }
+  margin: 0;
+  padding: 0;
 
-    .welcome {
-      margin: 0;
-      font-size: 26px;
-      font-weight: 750;
-      line-height: 1.12;
-    }
+  width: 100%;
+  height: 100%;
 
-    .subtext {
-      margin-top: 6px;
-      font-size: 16px;
-      color: var(--muted);
-    }
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
 
-    .langRow {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
+  background: #f5f6f8;
 
-    .langBtn {
-      min-width: 120px;
-      padding: 12px 18px;
-      font-size: 18px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #fff;
-      cursor: pointer;
-    }
+}
 
-    .langBtn.active {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-      font-weight: 700;
-    }
+body {
 
-    .content {
-      flex: 1;
-      overflow: auto;
-      padding-right: 4px;
-    }
+  display: flex;
 
-    .step { display: none; }
-    .step.active { display: block; }
+  justify-content: center;
 
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 22px;
-      margin-top: 22px;
-    }
+  align-items: center;
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 18px;
-      font-weight: 650;
-    }
+}
 
-    input {
-      width: 100%;
-      font-size: 22px;
-      padding: 16px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      outline: none;
-      background: #fff;
-    }
+.container {
 
-    input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(0,56,101,.12);
-    }
+  width: 100%;
 
-    .cameraFrame {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      max-height: 52vh;
-      border-radius: 18px;
-      overflow: hidden;
-      background: #000;
-      margin-top: 10px;
-    }
+  max-width: 650px;
 
-    video, #preview {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: #000;
-    }
+  padding: 30px;
 
-    .hintBox,
-    .notice,
-    .errorBox {
-      margin-top: 16px;
-      padding: 14px 16px;
-      border-radius: 14px;
-      text-align: center;
-      font-size: 18px;
-      font-weight: 650;
-    }
+}
 
-    .hintBox {
-      background: var(--hint-bg);
-      border: 1px solid var(--hint-border);
-      color: var(--hint-text);
-    }
+.card {
 
-    .notice {
-      background: var(--notice-bg);
-      border: 1px solid var(--notice-border);
-      color: var(--notice-text);
-    }
+  background: white;
 
-    .errorBox {
-      background: var(--error-bg);
-      border: 1px solid var(--error-border);
-      color: var(--error-text);
-      display: none;
-    }
+  border-radius: 18px;
 
-    .small {
-      font-size: 15px;
-      font-weight: 500;
-      line-height: 1.35;
-    }
+  padding: 35px;
 
-    .btns {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 18px;
-      flex-wrap: wrap;
-    }
+  box-shadow:
+    0 8px 30px rgba(
+      0,
+      0,
+      0,
+      0.10
+    );
 
-    button.actionBtn {
-      border: none;
-      border-radius: 14px;
-      padding: 16px 28px;
-      font-size: 20px;
-      cursor: pointer;
-      min-width: 180px;
-      user-select: none;
-    }
+}
 
-    button:disabled {
-      opacity: .6;
-      cursor: not-allowed;
-    }
+.header {
 
-    .primary {
-      background: var(--primary);
-      color: #fff;
-    }
+  text-align: center;
 
-    .secondary {
-      background: var(--secondary);
-      color: #111827;
-    }
+  margin-bottom: 25px;
 
-    .status {
-      min-height: 28px;
-      margin-top: 14px;
-      text-align: center;
-      font-size: 18px;
-    }
+}
 
-    @media (max-width: 750px) {
-      .wrap { padding: 12px; }
-      .card { min-height: auto; padding: 20px; }
-      .row { grid-template-columns: 1fr; }
-      .logo { height: 70px; }
-      .welcome { font-size: 22px; }
-      .subtext { font-size: 15px; }
-      button.actionBtn, .langBtn { width: 100%; }
-      .btns, .langRow { gap: 12px; }
-      .langRow { flex-direction: column; }
-    }
-  </style>
+.header h1 {
+
+  margin: 0;
+
+  font-size: 32px;
+
+}
+
+.header p {
+
+  margin: 8px 0 0;
+
+  color: #666;
+
+  font-size: 16px;
+
+}
+
+.language {
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-bottom: 25px;
+
+}
+
+.language button {
+
+  border: 1px solid #ccc;
+
+  background: white;
+
+  padding: 8px 16px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+}
+
+.language button.active {
+
+  background: #222;
+
+  color: white;
+
+  border-color: #222;
+
+}
+
+.form-group {
+
+  margin-bottom: 20px;
+
+}
+
+.form-group label {
+
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-weight: bold;
+
+  font-size: 16px;
+
+}
+
+.form-group input {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border:
+
+    1px solid #ccc;
+
+  border-radius: 9px;
+
+  font-size: 18px;
+
+}
+
+.camera-section {
+
+  margin-top: 25px;
+
+}
+
+.camera-container {
+
+  position: relative;
+
+  width: 100%;
+
+  background: #111;
+
+  border-radius: 12px;
+
+  overflow: hidden;
+
+  aspect-ratio: 4 / 3;
+
+}
+
+#video {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+
+}
+
+#photoPreview {
+
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  display: none;
+
+}
+
+.camera-buttons {
+
+  display: flex;
+
+  gap: 10px;
+
+  margin-top: 12px;
+
+}
+
+.camera-buttons button {
+
+  flex: 1;
+
+}
+
+button {
+
+  border: none;
+
+  border-radius: 9px;
+
+  padding: 14px 18px;
+
+  font-size: 17px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+}
+
+#captureButton {
+
+  background: #333;
+
+  color: white;
+
+}
+
+#retakeButton {
+
+  background: #ddd;
+
+  color: #222;
+
+}
+
+#submitButton {
+
+  width: 100%;
+
+  margin-top: 25px;
+
+  background: #0b57d0;
+
+  color: white;
+
+  font-size: 19px;
+
+  padding: 17px;
+
+}
+
+button:disabled {
+
+  opacity: 0.5;
+
+  cursor: not-allowed;
+
+}
+
+.status {
+
+  margin-top: 20px;
+
+  text-align: center;
+
+  min-height: 25px;
+
+  font-size: 16px;
+
+}
+
+.success {
+
+  color: #188038;
+
+}
+
+.error {
+
+  color: #d93025;
+
+}
+
+.loading {
+
+  color: #555;
+
+}
+
+.hidden {
+
+  display: none !important;
+
+}
+
+/*
+ * Hidden form used to POST to Apps Script.
+ *
+ * This avoids the CORS problems that occurred
+ * when using fetch() from GitHub Pages.
+ */
+
+#submitFrame {
+
+  width: 1px;
+
+  height: 1px;
+
+  border: 0;
+
+  position: absolute;
+
+  left: -10000px;
+
+  top: -10000px;
+
+}
+
+#submitForm {
+
+  display: none;
+
+}
+
+</style>
+
 </head>
+
+
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="header">
-        <img
-          class="logo"
-          src="https://www.nwasco.k12.or.us/pics/school_logo.png"
-          alt="North Wasco County School District logo"
-        >
-        <div>
-          <h1 class="welcome" id="welcomeText">Welcome to North Wasco County School District</h1>
-          <div class="subtext" id="subtextText">Please sign in before checking in with the front office.</div>
-        </div>
-      </div>
 
-      <div class="langRow">
-        <button class="langBtn active" id="langEnBtn" type="button">English</button>
-        <button class="langBtn" id="langEsBtn" type="button">Español</button>
-      </div>
 
-      <div class="content">
-        <div id="step1" class="step active">
-          <div class="row">
-            <div>
-              <label for="firstName" id="firstNameLabel">First Name</label>
-              <input id="firstName" autocomplete="given-name">
-            </div>
+<div class="container">
 
-            <div>
-              <label for="lastName" id="lastNameLabel">Last Name</label>
-              <input id="lastName" autocomplete="family-name">
-            </div>
-          </div>
+  <div class="card">
 
-          <div class="hintBox small" id="allowCameraText">
-            When prompted, tap <strong>Allow</strong> to let this page use the camera.
-          </div>
+    <div class="header">
 
-          <div class="btns">
-            <button class="actionBtn primary" id="startCameraBtn" type="button">Next: Take Photo</button>
-            <button class="actionBtn secondary" id="resetBtn" type="button">Reset</button>
-          </div>
+      <h1 id="pageTitle">
+        Visitor Sign-In
+      </h1>
 
-          <div class="status" id="status"></div>
-        </div>
+      <p id="pageSubtitle">
+        Please enter your information below.
+      </p>
 
-        <div id="step2" class="step">
-          <div class="hintBox" id="cameraHintText">
-            Center your face in the frame, then tap <strong>Capture Photo</strong>.
-          </div>
-
-          <div class="cameraFrame">
-            <video id="video" autoplay playsinline muted></video>
-          </div>
-
-          <div id="cameraErrorBox" class="errorBox small"></div>
-
-          <div class="btns">
-            <button class="actionBtn primary" id="captureBtn" type="button">Capture Photo</button>
-            <button class="actionBtn secondary" id="backBtn" type="button">Back</button>
-          </div>
-
-          <div class="status" id="statusCam"></div>
-        </div>
-
-        <div id="step3" class="step">
-          <div class="cameraFrame">
-            <img id="preview" alt="Visitor photo preview">
-          </div>
-
-          <div class="notice" id="secretaryText">
-            Please check in with the secretary for your ID badge.
-          </div>
-
-          <div class="btns">
-            <button class="actionBtn secondary" id="retakeBtn" type="button">Retake</button>
-            <button class="actionBtn primary" id="signInBtn" type="button">Sign In</button>
-          </div>
-
-          <div class="status" id="status2"></div>
-        </div>
-      </div>
     </div>
+
+
+    <div class="language">
+
+      <button
+        id="englishButton"
+        class="active"
+        type="button"
+      >
+        English
+      </button>
+
+      <button
+        id="spanishButton"
+        type="button"
+      >
+        Español
+      </button>
+
+    </div>
+
+
+    <form id="visitorForm">
+
+      <div class="form-group">
+
+        <label
+          id="firstNameLabel"
+          for="firstName"
+        >
+          First Name
+        </label>
+
+        <input
+          id="firstName"
+          name="firstName"
+          type="text"
+          autocomplete="off"
+          required
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label
+          id="lastNameLabel"
+          for="lastName"
+        >
+          Last Name
+        </label>
+
+        <input
+          id="lastName"
+          name="lastName"
+          type="text"
+          autocomplete="off"
+          required
+        >
+
+      </div>
+
+
+      <div class="camera-section">
+
+        <div class="camera-container">
+
+          <video
+            id="video"
+            autoplay
+            playsinline
+            muted
+          ></video>
+
+          <img
+            id="photoPreview"
+            alt="Visitor photo"
+          >
+
+        </div>
+
+
+        <canvas
+          id="canvas"
+          class="hidden"
+        ></canvas>
+
+
+        <div class="camera-buttons">
+
+          <button
+            id="captureButton"
+            type="button"
+          >
+            Take Photo
+          </button>
+
+          <button
+            id="retakeButton"
+            type="button"
+            class="hidden"
+          >
+            Retake Photo
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <button
+        id="submitButton"
+        type="submit"
+      >
+        Sign In
+      </button>
+
+
+      <div
+        id="status"
+        class="status"
+      ></div>
+
+    </form>
+
   </div>
 
-  <form
-    id="submitForm"
-    action="https://script.google.com/macros/s/AKfycbwK8NN2n4WPj4yQrfqugJR9YYzv49TiCYqloDUgMppZ2PUduB0Se85ZI_U5FKeO5Pal/exec"
-    method="POST"
-    target="submitFrame"
-    style="display:none;"
+</div>
+
+
+<!--
+  Hidden Apps Script submission iframe.
+-->
+<iframe
+  name="submitFrame"
+  id="submitFrame"
+></iframe>
+
+
+<!--
+  Hidden form used to submit visitor information.
+-->
+<form
+  id="submitForm"
+  method="POST"
+  target="submitFrame"
+  action="https://script.google.com/macros/s/AKfycbwK8NN2n4WPj4yQrfqugJR9YYzv49TiCYqloDUgMppZ2PUduB0Se85ZI_U5FKeO5Pal/exec"
+>
+
+  <input
+    type="hidden"
+    name="firstName"
+    id="submitFirstName"
   >
-    <input type="hidden" name="firstName" id="formFirstName">
-    <input type="hidden" name="lastName" id="formLastName">
-    <input type="hidden" name="photoDataUrl" id="formPhotoDataUrl">
-    <input type="hidden" name="device" id="formDevice">
-    <input type="hidden" name="lang" id="formLang">
-  </form>
 
-  <iframe name="submitFrame" id="submitFrame" style="display:none;"></iframe>
+  <input
+    type="hidden"
+    name="lastName"
+    id="submitLastName"
+  >
 
-  <script>
-    const i18n = {
-      en: {
-        welcome: "Welcome to North Wasco County School District",
-        subtext: "Please sign in before entering.",
-        firstName: "First Name",
-        lastName: "Last Name",
-        allowCamera: 'When prompted, tap <strong>Allow</strong> to let this page use the camera.',
-        nextPhoto: "Next: Take Photo",
-        reset: "Reset",
-        cameraHint: 'Center your face in the frame, then tap <strong>Capture Photo</strong>.',
-        capture: "Capture Photo",
-        back: "Back",
-        secretary: "Your visitor badge is printing below...",
-        retake: "Retake",
-        signIn: "Sign In",
-        enterName: "Please enter first and last name.",
-        startingCamera: "Starting camera...",
-        missingPhoto: "Missing photo. Please retake the picture.",
-        creatingBadge: "Creating badge...",
-        printingBadge: "Printing badge...",
-        done: "Done! Please grab your printed badge.",
-        stillWorking: "Still working... badge creation can take a little longer.",
-        cameraBlocked: "Camera access was blocked. Allow camera access for this site, then reload the page.",
-        noCamera: "No camera was found on this device.",
-        cameraBusy: "The camera is busy or unavailable. Close any other app using the camera and try again.",
-        cameraUnsupported: "This device or browser does not support camera access.",
-        cameraNotReady: "Camera is not ready yet. Please try again.",
-        captureFailed: "Could not capture photo.",
-        responseError: "Error reading server response.",
-        unknownError: "Unknown error"
-      },
-      es: {
-        welcome: "Bienvenido al Distrito Escolar del Condado de North Wasco",
-        subtext: "Por favor regístrese antes de entrar.",
-        firstName: "Nombre",
-        lastName: "Apellido",
-        allowCamera: 'Cuando se le pida, toque <strong>Permitir</strong> para usar la cámara.',
-        nextPhoto: "Siguiente: Tomar foto",
-        reset: "Reiniciar",
-        cameraHint: 'Centre su rostro en la imagen y luego toque <strong>Tomar foto</strong>.',
-        capture: "Tomar foto",
-        back: "Atrás",
-        secretary: "Imprimiendo su gafete de visitante...",
-        retake: "Tomar otra",
-        signIn: "Registrar",
-        enterName: "Por favor ingrese nombre y apellido.",
-        startingCamera: "Iniciando cámara...",
-        missingPhoto: "Falta la foto. Vuelva a tomarla.",
-        creatingBadge: "Creando gafete...",
-        printingBadge: "Imprimiendo gafete...",
-        done: "¡Listo! Por favor tome su gafete impreso.",
-        stillWorking: "Todavía trabajando... la creación del gafete puede tardar un poco más.",
-        cameraBlocked: "El acceso a la cámara fue bloqueado. Permita la cámara para este sitio y vuelva a cargar la página.",
-        noCamera: "No se encontró una cámara en este dispositivo.",
-        cameraBusy: "La cámara está ocupada o no disponible. Cierre otra aplicación que la esté usando e inténtelo de nuevo.",
-        cameraUnsupported: "Este dispositivo o navegador no admite acceso a la cámara.",
-        cameraNotReady: "La cámara todavía no está lista. Inténtelo de nuevo.",
-        captureFailed: "No se pudo tomar la foto.",
-        responseError: "Error al leer la respuesta del servidor.",
-        unknownError: "Error desconocido"
-      }
-    };
+  <input
+    type="hidden"
+    name="photoDataUrl"
+    id="submitPhotoDataUrl"
+  >
 
-    let currentLang = "en";
+  <input
+    type="hidden"
+    name="device"
+    id="submitDevice"
+  >
 
-    function tr(key) {
-      return (i18n[currentLang] && i18n[currentLang][key]) || i18n.en[key] || key;
-    }
+  <input
+    type="hidden"
+    name="lang"
+    id="submitLang"
+  >
 
-    const step1 = document.getElementById("step1");
-    const step2 = document.getElementById("step2");
-    const step3 = document.getElementById("step3");
+</form>
 
-    const firstNameEl = document.getElementById("firstName");
-    const lastNameEl = document.getElementById("lastName");
-    const video = document.getElementById("video");
-    const preview = document.getElementById("preview");
 
-    const statusEl = document.getElementById("status");
-    const statusCamEl = document.getElementById("statusCam");
-    const status2El = document.getElementById("status2");
-    const cameraErrorBox = document.getElementById("cameraErrorBox");
+<script>
 
-    const startCameraBtn = document.getElementById("startCameraBtn");
-    const captureBtn = document.getElementById("captureBtn");
-    const backBtn = document.getElementById("backBtn");
-    const retakeBtn = document.getElementById("retakeBtn");
-    const signInBtn = document.getElementById("signInBtn");
-    const resetBtn = document.getElementById("resetBtn");
-    const submitFrame = document.getElementById("submitFrame");
-    const langEnBtn = document.getElementById("langEnBtn");
-    const langEsBtn = document.getElementById("langEsBtn");
 
-    let stream = null;
-    let photoDataUrl = null;
-    let isSubmitting = false;
-    let inactivityTimer = null;
-    let submitStartedAt = 0;
-    let submitTimeout = null;
-    let gotServerResponse = false;
+/* ============================================================
+   CONFIGURATION
+   ============================================================ */
 
-    function applyLanguage() {
-      document.getElementById("welcomeText").textContent = tr("welcome");
-      document.getElementById("subtextText").textContent = tr("subtext");
-      document.getElementById("firstNameLabel").textContent = tr("firstName");
-      document.getElementById("lastNameLabel").textContent = tr("lastName");
-      document.getElementById("allowCameraText").innerHTML = tr("allowCamera");
-      document.getElementById("cameraHintText").innerHTML = tr("cameraHint");
-      document.getElementById("secretaryText").textContent = tr("secretary");
+const RESET_TIME = 120000;
 
-      startCameraBtn.textContent = tr("nextPhoto");
-      resetBtn.textContent = tr("reset");
-      captureBtn.textContent = tr("capture");
-      backBtn.textContent = tr("back");
-      retakeBtn.textContent = tr("retake");
-      signInBtn.textContent = tr("signIn");
 
-      langEnBtn.classList.toggle("active", currentLang === "en");
-      langEsBtn.classList.toggle("active", currentLang === "es");
-    }
+/* ============================================================
+   ELEMENTS
+   ============================================================ */
 
-    function setStatus(message) {
-      const msg = message || "";
-      statusEl.textContent = msg;
-      statusCamEl.textContent = msg;
-      status2El.textContent = msg;
-    }
+const visitorForm =
+  document.getElementById(
+    "visitorForm"
+  );
 
-    function clearCameraError() {
-      cameraErrorBox.style.display = "none";
-      cameraErrorBox.textContent = "";
-    }
+const firstName =
+  document.getElementById(
+    "firstName"
+  );
 
-    function showCameraError(message) {
-      cameraErrorBox.textContent = message;
-      cameraErrorBox.style.display = "block";
-    }
+const lastName =
+  document.getElementById(
+    "lastName"
+  );
 
-    function showStep(stepNumber) {
-      step1.classList.toggle("active", stepNumber === 1);
-      step2.classList.toggle("active", stepNumber === 2);
-      step3.classList.toggle("active", stepNumber === 3);
+const video =
+  document.getElementById(
+    "video"
+  );
 
-      if (stepNumber === 1) {
-        clearCameraError();
-        firstNameEl.focus();
-      }
-    }
+const canvas =
+  document.getElementById(
+    "canvas"
+  );
 
-    function stopCamera() {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
-      }
-      video.srcObject = null;
-    }
+const photoPreview =
+  document.getElementById(
+    "photoPreview"
+  );
 
-    function resetInactivityTimer() {
-      clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(() => {
-        location.reload();
-      }, 120000);
-    }
+const captureButton =
+  document.getElementById(
+    "captureButton"
+  );
 
-    function validateNames() {
-      const first = firstNameEl.value.trim();
-      const last = lastNameEl.value.trim();
+const retakeButton =
+  document.getElementById(
+    "retakeButton"
+  );
 
-      if (!first || !last) {
-        setStatus(tr("enterName"));
-        return null;
-      }
+const submitButton =
+  document.getElementById(
+    "submitButton"
+  );
 
-      return { first, last };
-    }
+const status =
+  document.getElementById(
+    "status"
+  );
 
-    async function startCamera() {
-      setStatus(tr("startingCamera"));
-      clearCameraError();
-      stopCamera();
+const submitForm =
+  document.getElementById(
+    "submitForm"
+  );
 
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        const msg = tr("cameraUnsupported");
-        setStatus(msg);
-        showCameraError(msg);
-        throw new Error(msg);
-      }
+const submitFirstName =
+  document.getElementById(
+    "submitFirstName"
+  );
 
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+const submitLastName =
+  document.getElementById(
+    "submitLastName"
+  );
+
+const submitPhotoDataUrl =
+  document.getElementById(
+    "submitPhotoDataUrl"
+  );
+
+const submitDevice =
+  document.getElementById(
+    "submitDevice"
+  );
+
+const submitLang =
+  document.getElementById(
+    "submitLang"
+  );
+
+const englishButton =
+  document.getElementById(
+    "englishButton"
+  );
+
+const spanishButton =
+  document.getElementById(
+    "spanishButton"
+  );
+
+
+/* ============================================================
+   LANGUAGE
+   ============================================================ */
+
+let currentLanguage = "en";
+
+
+const translations = {
+
+  en: {
+
+    title:
+      "Visitor Sign-In",
+
+    subtitle:
+      "Please enter your information below.",
+
+    firstName:
+      "First Name",
+
+    lastName:
+      "Last Name",
+
+    takePhoto:
+      "Take Photo",
+
+    retake:
+      "Retake Photo",
+
+    signIn:
+      "Sign In",
+
+    startingCamera:
+      "Starting camera...",
+
+    cameraReady:
+      "Camera ready.",
+
+    cameraError:
+      "Unable to access the camera. Please check camera permissions.",
+
+    photoTaken:
+      "Photo captured.",
+
+    processing:
+      "Creating your visitor badge...",
+
+    printing:
+      "Printing visitor badge...",
+
+    complete:
+      "Done. Please check in with the secretary.",
+
+    error:
+      "Something went wrong. Please contact the secretary."
+
+  },
+
+
+  es: {
+
+    title:
+      "Registro de Visitantes",
+
+    subtitle:
+      "Ingrese su información a continuación.",
+
+    firstName:
+      "Nombre",
+
+    lastName:
+      "Apellido",
+
+    takePhoto:
+      "Tomar Foto",
+
+    retake:
+      "Tomar Otra Foto",
+
+    signIn:
+      "Registrarse",
+
+    startingCamera:
+      "Iniciando cámara...",
+
+    cameraReady:
+      "Cámara lista.",
+
+    cameraError:
+      "No se pudo acceder a la cámara. Revise los permisos de la cámara.",
+
+    photoTaken:
+      "Foto tomada.",
+
+    processing:
+      "Creando su gafete de visitante...",
+
+    printing:
+      "Imprimiendo gafete de visitante...",
+
+    complete:
+      "Listo. Por favor, regístrese con la secretaria.",
+
+    error:
+      "Algo salió mal. Por favor, comuníquese con la secretaria."
+
+  }
+
+};
+
+
+function setLanguage(lang) {
+
+  currentLanguage =
+    lang === "es"
+      ? "es"
+      : "en";
+
+  const t =
+    translations[currentLanguage];
+
+
+  document.documentElement.lang =
+    currentLanguage;
+
+
+  document.getElementById(
+    "pageTitle"
+  ).textContent = t.title;
+
+
+  document.getElementById(
+    "pageSubtitle"
+  ).textContent = t.subtitle;
+
+
+  document.getElementById(
+    "firstNameLabel"
+  ).textContent = t.firstName;
+
+
+  document.getElementById(
+    "lastNameLabel"
+  ).textContent = t.lastName;
+
+
+  captureButton.textContent =
+    t.takePhoto;
+
+
+  retakeButton.textContent =
+    t.retake;
+
+
+  submitButton.textContent =
+    t.signIn;
+
+
+  englishButton.classList.toggle(
+    "active",
+    currentLanguage === "en"
+  );
+
+
+  spanishButton.classList.toggle(
+    "active",
+    currentLanguage === "es"
+  );
+
+}
+
+
+englishButton.addEventListener(
+  "click",
+  () => setLanguage("en")
+);
+
+
+spanishButton.addEventListener(
+  "click",
+  () => setLanguage("es")
+);
+
+
+/* ============================================================
+   CAMERA
+   ============================================================ */
+
+let cameraStream = null;
+
+let capturedPhotoDataUrl = "";
+
+
+async function startCamera() {
+
+  const t =
+    translations[currentLanguage];
+
+  status.textContent =
+    t.startingCamera;
+
+  status.className =
+    "status loading";
+
+
+  try {
+
+    cameraStream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video: {
+
+          facingMode: {
+            ideal: "environment"
           },
-          audio: false
-        });
 
-        video.srcObject = stream;
-        await video.play();
-        setStatus("");
-      } catch (e) {
-        let friendly = tr("cameraUnsupported");
+          width: {
+            ideal: 1280
+          },
 
-        if (e.name === "NotAllowedError") {
-          friendly = tr("cameraBlocked");
-        } else if (e.name === "NotFoundError") {
-          friendly = tr("noCamera");
-        } else if (e.name === "NotReadableError") {
-          friendly = tr("cameraBusy");
-        } else if (e.message) {
-          friendly = e.message;
-        }
-
-        setStatus(friendly);
-        showCameraError(friendly);
-        throw e;
-      }
-    }
-
-    function captureAndResizeDataUrl(quality = 0.72, maxWidth = 700) {
-      const sourceWidth = video.videoWidth;
-      const sourceHeight = video.videoHeight;
-
-      if (!sourceWidth || !sourceHeight) {
-        throw new Error(tr("cameraNotReady"));
-      }
-
-      const scale = Math.min(1, maxWidth / sourceWidth);
-      const width = Math.round(sourceWidth * scale);
-      const height = Math.round(sourceHeight * scale);
-
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(video, 0, 0, width, height);
-
-      return canvas.toDataURL("image/jpeg", quality);
-    }
-
-    function finishSuccess() {
-      clearTimeout(submitTimeout);
-      gotServerResponse = true;
-      setStatus(tr("done"));
-      setTimeout(() => {
-        location.reload();
-      }, 2000);
-    }
-
-    function finishError(message) {
-      clearTimeout(submitTimeout);
-      gotServerResponse = true;
-      setStatus("Error: " + (message || tr("unknownError")));
-      isSubmitting = false;
-      signInBtn.disabled = false;
-      retakeBtn.disabled = false;
-    }
-
-    function printBadgeDirectly(badgeHtml) {
-      setStatus(tr("printingBadge"));
-
-      let printFrame = document.getElementById("silentPrintFrame");
-      if (!printFrame) {
-        printFrame = document.createElement("iframe");
-        printFrame.id = "silentPrintFrame";
-        printFrame.style.position = "fixed";
-        printFrame.style.right = "0";
-        printFrame.style.bottom = "0";
-        printFrame.style.width = "0px";
-        printFrame.style.height = "0px";
-        printFrame.style.border = "0";
-        document.body.appendChild(printFrame);
-      }
-
-      const doc = printFrame.contentWindow.document;
-      doc.open();
-      doc.write(badgeHtml);
-      doc.close();
-
-      printFrame.contentWindow.onload = () => {
-        setTimeout(() => {
-          try {
-            printFrame.contentWindow.focus();
-            printFrame.contentWindow.print();
-          } catch (e) {
-            console.error("Print command failed:", e);
+          height: {
+            ideal: 720
           }
-          finishSuccess();
-        }, 300);
-      };
-    }
 
-    function submitVisit() {
-      const names = validateNames();
-      if (!names) return;
+        },
 
-      if (!photoDataUrl) {
-        setStatus(tr("missingPhoto"));
-        return;
-      }
+        audio: false
 
-      if (isSubmitting) return;
-
-      isSubmitting = true;
-      gotServerResponse = false;
-      submitStartedAt = Date.now();
-
-      signInBtn.disabled = true;
-      retakeBtn.disabled = true;
-
-      setStatus(tr("creatingBadge"));
-
-      document.getElementById("formFirstName").value = names.first;
-      document.getElementById("formLastName").value = names.last;
-      document.getElementById("formPhotoDataUrl").value = photoDataUrl;
-      document.getElementById("formDevice").value = navigator.userAgent;
-      document.getElementById("formLang").value = currentLang;
-
-      clearTimeout(submitTimeout);
-      submitTimeout = setTimeout(() => {
-        if (!gotServerResponse) {
-          setStatus(tr("stillWorking"));
-        }
-      }, 8000);
-
-      document.getElementById("submitForm").submit();
-    }
-
-    function handleServerResponse(data) {
-      if (data.ok) {
-        if (data.badgeHtml) {
-          printBadgeDirectly(data.badgeHtml);
-        } else {
-          finishSuccess();
-        }
-      } else {
-        finishError(data.error);
-      }
-    }
-
-    window.addEventListener("message", (event) => {
-      try {
-        let data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-        if (typeof data === "string") {
-          data = JSON.parse(data);
-        }
-        if (!data || typeof data.ok === "undefined") return;
-        handleServerResponse(data);
-      } catch (err) {
-        finishError(tr("responseError"));
-      }
-    });
-
-    submitFrame.addEventListener("load", () => {
-      if (!isSubmitting || gotServerResponse) return;
-      if (Date.now() - submitStartedAt < 1200) return;
-      finishSuccess();
-    });
-
-    async function handleStartCamera() {
-      const names = validateNames();
-      if (!names) return;
-
-      startCameraBtn.disabled = true;
-
-      try {
-        await startCamera();
-        showStep(2);
-      } catch (e) {
-      } finally {
-        startCameraBtn.disabled = false;
-      }
-    }
-
-    function handleCapture() {
-      try {
-        photoDataUrl = captureAndResizeDataUrl();
-        preview.src = photoDataUrl;
-        stopCamera();
-        setStatus("");
-        showStep(3);
-      } catch (e) {
-        setStatus(e.message || tr("captureFailed"));
-      }
-    }
-
-    async function handleRetake() {
-      retakeBtn.disabled = true;
-      signInBtn.disabled = true;
-
-      try {
-        await startCamera();
-        showStep(2);
-      } catch (e) {
-      } finally {
-        retakeBtn.disabled = false;
-        signInBtn.disabled = false;
-      }
-    }
-
-    function handleBack() {
-      stopCamera();
-      setStatus("");
-      clearCameraError();
-      showStep(1);
-    }
-
-    function handleReset() {
-      location.reload();
-    }
-
-    startCameraBtn.addEventListener("click", handleStartCamera);
-    captureBtn.addEventListener("click", handleCapture);
-    backBtn.addEventListener("click", handleBack);
-    retakeBtn.addEventListener("click", handleRetake);
-    signInBtn.addEventListener("click", submitVisit);
-    resetBtn.addEventListener("click", handleReset);
-
-    langEnBtn.addEventListener("click", () => {
-      currentLang = "en";
-      applyLanguage();
-    });
-
-    langEsBtn.addEventListener("click", () => {
-      currentLang = "es";
-      applyLanguage();
-    });
-
-    [firstNameEl, lastNameEl].forEach(el => {
-      el.addEventListener("keydown", event => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          handleStartCamera();
-        }
       });
-    });
 
-    ["click", "touchstart", "keydown", "mousemove"].forEach(eventName => {
-      document.addEventListener(eventName, resetInactivityTimer, { passive: true });
-    });
 
-    window.addEventListener("beforeunload", stopCamera);
+    video.srcObject =
+      cameraStream;
 
-    applyLanguage();
-    showStep(1);
-    resetInactivityTimer();
-  </script>
+
+    await video.play();
+
+
+    status.textContent =
+      t.cameraReady;
+
+    status.className =
+      "status";
+
+
+  } catch (error) {
+
+    console.error(
+      "Camera error:",
+      error
+    );
+
+    status.textContent =
+      t.cameraError;
+
+    status.className =
+      "status error";
+
+  }
+
+}
+
+
+/* ============================================================
+   CAPTURE PHOTO
+   ============================================================ */
+
+captureButton.addEventListener(
+  "click",
+  capturePhoto
+);
+
+
+function capturePhoto() {
+
+  if (
+    !video.videoWidth ||
+    !video.videoHeight
+  ) {
+
+    status.textContent =
+      "Camera is not ready.";
+
+    status.className =
+      "status error";
+
+    return;
+  }
+
+
+  const maxWidth = 700;
+
+  let width =
+    video.videoWidth;
+
+  let height =
+    video.videoHeight;
+
+
+  if (width > maxWidth) {
+
+    height =
+      Math.round(
+        height *
+        (maxWidth / width)
+      );
+
+    width =
+      maxWidth;
+  }
+
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+
+  const ctx =
+    canvas.getContext("2d");
+
+
+  ctx.drawImage(
+    video,
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  capturedPhotoDataUrl =
+    canvas.toDataURL(
+      "image/jpeg",
+      0.72
+    );
+
+
+  photoPreview.src =
+    capturedPhotoDataUrl;
+
+
+  video.style.display =
+    "none";
+
+  photoPreview.style.display =
+    "block";
+
+
+  captureButton.classList.add(
+    "hidden"
+  );
+
+  retakeButton.classList.remove(
+    "hidden"
+  );
+
+
+  const t =
+    translations[currentLanguage];
+
+
+  status.textContent =
+    t.photoTaken;
+
+  status.className =
+    "status";
+
+
+  resetTimer();
+
+}
+
+
+/* ============================================================
+   RETAKE PHOTO
+   ============================================================ */
+
+retakeButton.addEventListener(
+  "click",
+  () => {
+
+    capturedPhotoDataUrl = "";
+
+    photoPreview.src = "";
+
+    photoPreview.style.display =
+      "none";
+
+    video.style.display =
+      "block";
+
+    captureButton.classList.remove(
+      "hidden"
+    );
+
+    retakeButton.classList.add(
+      "hidden"
+    );
+
+    const t =
+      translations[currentLanguage];
+
+    status.textContent =
+      t.cameraReady;
+
+    status.className =
+      "status";
+
+    resetTimer();
+
+  }
+);
+
+
+/* ============================================================
+   SUBMIT VISITOR
+   ============================================================ */
+
+visitorForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+
+    if (!firstName.value.trim()) {
+
+      firstName.focus();
+
+      return;
+    }
+
+
+    if (!lastName.value.trim()) {
+
+      lastName.focus();
+
+      return;
+    }
+
+
+    if (!capturedPhotoDataUrl) {
+
+      status.textContent =
+        "Please take a photo first.";
+
+      status.className =
+        "status error";
+
+      return;
+    }
+
+
+    const t =
+      translations[currentLanguage];
+
+
+    submitButton.disabled =
+      true;
+
+    captureButton.disabled =
+      true;
+
+    retakeButton.disabled =
+      true;
+
+
+    status.textContent =
+      t.processing;
+
+    status.className =
+      "status loading";
+
+
+    /*
+     * Populate hidden Apps Script form.
+     */
+
+    submitFirstName.value =
+      firstName.value.trim();
+
+
+    submitLastName.value =
+      lastName.value.trim();
+
+
+    submitPhotoDataUrl.value =
+      capturedPhotoDataUrl;
+
+
+    submitLang.value =
+      currentLanguage;
+
+
+    /*
+     * Record Chromebook information.
+     */
+
+    submitDevice.value =
+      navigator.userAgent;
+
+
+    /*
+     * Submit to Apps Script.
+     */
+
+    submitForm.submit();
+
+    resetTimer();
+
+  }
+);
+
+
+/* ============================================================
+   RECEIVE APPS SCRIPT RESPONSE
+   ============================================================ */
+
+window.addEventListener(
+  "message",
+  async function(event) {
+
+    /*
+     * Apps Script returns a JSON string
+     * through window.parent.postMessage().
+     */
+
+    let response = null;
+
+
+    try {
+
+      if (
+        typeof event.data === "string"
+      ) {
+
+        response =
+          JSON.parse(event.data);
+
+      } else if (
+        event.data &&
+        typeof event.data === "object"
+      ) {
+
+        response =
+          event.data;
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Could not parse Apps Script response:",
+        error
+      );
+
+      return;
+
+    }
+
+
+    if (!response) {
+      return;
+    }
+
+
+    if (!response.ok) {
+
+      const t =
+        translations[currentLanguage];
+
+
+      status.textContent =
+        response.error ||
+        t.error;
+
+      status.className =
+        "status error";
+
+
+      submitButton.disabled =
+        false;
+
+      captureButton.disabled =
+        false;
+
+      retakeButton.disabled =
+        false;
+
+
+      return;
+    }
+
+
+    /*
+     * We have successfully:
+     *
+     * 1. Saved the photo
+     * 2. Created the badge PDF
+     * 3. Logged the visitor
+     *
+     * Now print the badge.
+     */
+
+    await printBadge(
+      response.badgeHtml
+    );
+
+  }
+);
+
+
+/* ============================================================
+   PRINT BADGE
+   ============================================================ */
+
+async function printBadge(
+  badgeHtml
+) {
+
+  const t =
+    translations[currentLanguage];
+
+
+  status.textContent =
+    t.printing;
+
+  status.className =
+    "status loading";
+
+
+  if (!badgeHtml) {
+
+    status.textContent =
+      t.error;
+
+    status.className =
+      "status error";
+
+    return;
+  }
+
+
+  /*
+   * Create an invisible print iframe.
+   *
+   * This keeps the visitor kiosk page itself
+   * visible while the badge is printed.
+   */
+
+  const printFrame =
+    document.createElement(
+      "iframe"
+    );
+
+
+  printFrame.style.position =
+    "fixed";
+
+  printFrame.style.right =
+    "0";
+
+  printFrame.style.bottom =
+    "0";
+
+  printFrame.style.width =
+    "0";
+
+  printFrame.style.height =
+    "0";
+
+  printFrame.style.border =
+    "0";
+
+  printFrame.style.opacity =
+    "0";
+
+
+  document.body.appendChild(
+    printFrame
+  );
+
+
+  /*
+   * Wait for the iframe document to become available.
+   */
+
+  const printDocument =
+    printFrame.contentWindow.document;
+
+
+  printDocument.open();
+
+  printDocument.write(
+    badgeHtml
+  );
+
+  printDocument.close();
+
+
+  /*
+   * Wait for the badge image to load.
+   *
+   * The image is a data URL, but we still
+   * give Chrome a moment to finish layout.
+   */
+
+  await new Promise(
+    resolve => setTimeout(
+      resolve,
+      500
+    )
+  );
+
+
+  /*
+   * Print.
+   *
+   * With ChromeOS SilentPrintingEnabled enabled,
+   * Chrome should immediately send this to the
+   * default printer instead of displaying
+   * print preview.
+   */
+
+  try {
+
+    printFrame.contentWindow.focus();
+
+    printFrame.contentWindow.print();
+
+  } catch (error) {
+
+    console.error(
+      "Print error:",
+      error
+    );
+
+    status.textContent =
+      t.error;
+
+    status.className =
+      "status error";
+
+
+    document.body.removeChild(
+      printFrame
+    );
+
+    submitButton.disabled =
+      false;
+
+    captureButton.disabled =
+      false;
+
+    retakeButton.disabled =
+      false;
+
+    return;
+  }
+
+
+  /*
+   * Give Chrome time to hand the job
+   * to the printing system.
+   */
+
+  setTimeout(
+    () => {
+
+      try {
+
+        document.body.removeChild(
+          printFrame
+        );
+
+      } catch (error) {
+
+        console.log(
+          "Print iframe cleanup:",
+          error
+        );
+
+      }
+
+    },
+    3000
+  );
+
+
+  /*
+   * Tell visitor the process is complete.
+   */
+
+  status.textContent =
+    t.complete;
+
+  status.className =
+    "status success";
+
+
+  /*
+   * Reset kiosk after a short delay.
+   */
+
+  setTimeout(
+    resetKiosk,
+    2500
+  );
+
+}
+
+
+/* ============================================================
+   RESET KIOSK
+   ============================================================ */
+
+function resetKiosk() {
+
+  visitorForm.reset();
+
+  capturedPhotoDataUrl =
+    "";
+
+
+  photoPreview.src = "";
+
+  photoPreview.style.display =
+    "none";
+
+
+  video.style.display =
+    "block";
+
+
+  captureButton.classList.remove(
+    "hidden"
+  );
+
+
+  retakeButton.classList.add(
+    "hidden"
+  );
+
+
+  submitButton.disabled =
+    false;
+
+  captureButton.disabled =
+    false;
+
+  retakeButton.disabled =
+    false;
+
+
+  status.textContent =
+    "";
+
+
+  startCamera();
+
+  resetTimer();
+
+}
+
+
+/* ============================================================
+   INACTIVITY RESET
+   ============================================================ */
+
+let resetTimerHandle = null;
+
+
+function resetTimer() {
+
+  clearTimeout(
+    resetTimerHandle
+  );
+
+
+  resetTimerHandle =
+    setTimeout(
+      () => {
+
+        /*
+         * Only reset if the form has
+         * actually been abandoned.
+         */
+
+        if (
+          !firstName.value &&
+          !lastName.value &&
+          !capturedPhotoDataUrl
+        ) {
+
+          return;
+
+        }
+
+
+        resetKiosk();
+
+      },
+      RESET_TIME
+    );
+
+}
+
+
+/* ============================================================
+   USER ACTIVITY
+   ============================================================ */
+
+[
+  "click",
+  "touchstart",
+  "keydown",
+  "input"
+].forEach(
+  eventName => {
+
+    document.addEventListener(
+      eventName,
+      resetTimer,
+      {
+        passive: true
+      }
+    );
+
+  }
+);
+
+
+/* ============================================================
+   INITIALIZE
+   ============================================================ */
+
+setLanguage("en");
+
+startCamera();
+
+resetTimer();
+
+
+</script>
+
 </body>
+
 </html>
