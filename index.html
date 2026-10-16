@@ -114,6 +114,7 @@ const translations = {
 let lang = 'en';
 let stream = null;
 let photoDataUrl = '';
+let printPhotoDataUrl = ''; // separate bright, dithered photo for thermal labels
 let submitting = false;
 let resetHandle = null;
 let requestTimeoutHandle = null;
@@ -160,6 +161,37 @@ async function startCamera() {
     show(t().cameraError,'error');
   }
 }
+// Turn a camera frame into a high-key black/white image specifically for the
+// Brother direct-thermal printer. The original color JPEG remains unchanged
+// for Google Drive and the kiosk preview.
+function makeThermalPhoto(sourceCanvas) {
+  const size=288;
+  const output=document.createElement('canvas');
+  output.width=size; output.height=size;
+  const ctx=output.getContext('2d', {willReadFrequently:true});
+  // Center crop, same square shape as the badge photo.
+  const crop=Math.min(sourceCanvas.width,sourceCanvas.height);
+  const sx=(sourceCanvas.width-crop)/2;
+  const sy=(sourceCanvas.height-crop)/2;
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size);
+  ctx.drawImage(sourceCanvas,sx,sy,crop,crop,0,0,size,size);
+  const img=ctx.getImageData(0,0,size,size);
+  const px=img.data;
+  const matrix=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+  // Brighten shadows strongly then use ordered dithering rather than allowing
+  // the printer to convert gray patches into nearly solid black.
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++) {
+    const i=(y*size+x)*4;
+    const lum=(0.2126*px[i]+0.7152*px[i+1]+0.0722*px[i+2])/255;
+    const lifted=Math.min(1,Math.pow(lum,0.56)*1.12+0.06);
+    const threshold=(matrix[(y%4)*4+(x%4)]+0.5)/16;
+    const value=lifted>threshold?255:0;
+    px[i]=value; px[i+1]=value; px[i+2]=value; px[i+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+  return output.toDataURL('image/png');
+}
+
 function capturePhoto() {
   if (submitting) return;
   if (!video.videoWidth || !video.videoHeight) { show(t().cameraError,'error'); return; }
@@ -168,6 +200,7 @@ function capturePhoto() {
   canvas.width=width; canvas.height=height;
   canvas.getContext('2d').drawImage(video,0,0,width,height);
   photoDataUrl=canvas.toDataURL('image/jpeg',.72);
+  printPhotoDataUrl=makeThermalPhoto(canvas);
   preview.src=photoDataUrl;
   preview.style.display='block'; video.style.display='none';
   captureButton.classList.add('hidden'); retakeButton.classList.remove('hidden');
@@ -175,7 +208,7 @@ function capturePhoto() {
 }
 function retakePhoto() {
   if (submitting) return;
-  photoDataUrl=''; preview.removeAttribute('src');
+  photoDataUrl=''; printPhotoDataUrl=''; preview.removeAttribute('src');
   preview.style.display='none'; video.style.display='block';
   captureButton.classList.remove('hidden'); retakeButton.classList.add('hidden');
   show(t().ready); resetInactivityTimer();
@@ -197,7 +230,7 @@ visitorForm.addEventListener('submit', event=>{
   // Generate the badge directly on this Chromebook. Printing no longer waits
   // for the Google Apps Script response, which may be delayed or blocked.
   printWindow = openPrintWindow();
-  const localBadge = buildLocalBadge(firstName.value.trim(),lastName.value.trim(),photoDataUrl,lang);
+  const localBadge = buildLocalBadge(firstName.value.trim(),lastName.value.trim(),printPhotoDataUrl || photoDataUrl,lang);
   lastBadgeHtml = localBadge;
   $('reprintButton').classList.remove('hidden');
   printSucceeded = false;
@@ -337,7 +370,7 @@ function resetKiosk() {
   if (submitting && !completionHandle) return;
   submitting=false; activeRequestId=null; clearTimeout(requestTimeoutHandle); clearTimeout(completionHandle);
   lastBadgeHtml=''; printSucceeded=false; recordSaved=false; $('reprintButton').classList.add('hidden');
-  visitorForm.reset(); photoDataUrl=''; preview.removeAttribute('src');
+  visitorForm.reset(); photoDataUrl=''; printPhotoDataUrl=''; preview.removeAttribute('src');
   preview.style.display='none'; video.style.display='block';
   captureButton.classList.remove('hidden'); retakeButton.classList.add('hidden');
   lockForm(false); setLanguage('en'); show(''); startCamera(); resetInactivityTimer();
