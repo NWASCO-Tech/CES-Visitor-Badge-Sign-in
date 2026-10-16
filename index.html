@@ -5,62 +5,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Visitor Sign-In</title>
 <style>
-  * { box-sizing: border-box; }
-  html, body { margin: 0; min-height: 100%; font-family: Arial, Helvetica, sans-serif; background: #f5f6f8; }
-  body { display: flex; justify-content: center; align-items: flex-start; padding: 24px 12px; }
-  .container { width: 100%; max-width: 650px; }
-  .card { background: white; border-radius: 18px; padding: 30px; box-shadow: 0 8px 30px #00000018; }
-  .header { text-align: center; margin-bottom: 24px; }
-  .header h1 { font-size: 32px; margin: 0; }
-  .header p { color: #666; font-size: 16px; margin: 8px 0 0; }
-  .language { display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; }
-  button { border: 0; border-radius: 9px; padding: 14px 18px; font-size: 17px; font-weight: bold; cursor: pointer; }
-  button:disabled { opacity: .5; cursor: not-allowed; }
-  .language button { border: 1px solid #ccc; background: white; padding: 8px 16px; font-size: 14px; }
-  .language button.active { background: #222; color: white; border-color: #222; }
-  .form-group { margin-bottom: 18px; }
-  .form-group label { display: block; margin-bottom: 7px; font-weight: bold; font-size: 16px; }
-  .form-group input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 9px; font-size: 18px; }
-  .camera-container { width: 100%; position: relative; aspect-ratio: 4/3; background: #111; border-radius: 12px; overflow: hidden; }
-  #video, #photoPreview { width: 100%; height: 100%; object-fit: cover; }
-  #photoPreview { display: none; }
-  .camera-buttons { display: flex; gap: 10px; margin-top: 12px; }
-  .camera-buttons button { flex: 1; }
-  #captureButton { background: #333; color: white; }
-  #retakeButton { background: #ddd; color: #222; }
-  #submitButton { width: 100%; margin-top: 25px; color: white; background: #0b57d0; padding: 17px; font-size: 19px; }
-  .status { text-align: center; margin-top: 20px; min-height: 25px; font-size: 16px; }
-  .error { color: #d93025; }
-  .success { color: #188038; }
-  .loading { color: #555; }
-  .hidden { display: none !important; }
-  #submitFrame, #printFrame { position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; border: none; }
-  #submitForm { display: none; }
-  @media (max-width: 500px) { .card { padding: 20px; } }
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#edf1f6;color:#1e293b}
+body{min-height:100dvh;display:grid;place-items:center;padding:12px}
+.container{width:min(100%,1120px)}
+.card{background:#fff;border-radius:18px;padding:22px 28px;box-shadow:0 8px 30px #1725541b}
+.header{text-align:center;margin-bottom:10px}.header h1{font-size:28px;margin:0}.header p{font-size:14px;color:#64748b;margin:5px 0}
+.language{display:flex;justify-content:center;gap:8px;margin-bottom:12px}
+button{border:0;border-radius:9px;padding:12px 15px;font-size:16px;font-weight:700;cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.5;cursor:not-allowed}
+.language button{background:#fff;color:#1e293b;border:1px solid #cbd5e1;padding:8px 17px;font-size:14px}
+.language button.active{background:#1e293b;color:white}
+.form-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:24px;align-items:start}
+.form-group{margin-bottom:18px}.form-group label{display:block;margin-bottom:7px;font-weight:700;font-size:17px}
+.form-group input{width:100%;height:56px;padding:11px 14px;border:1px solid #cbd5e1;border-radius:9px;font-size:20px}
+.camera-container{width:100%;height:330px;background:#111;border-radius:12px;overflow:hidden}
+#video,#photoPreview{width:100%;height:100%;object-fit:cover;display:block}#photoPreview{display:none}
+.camera-buttons{display:flex;gap:10px;margin-top:10px}.camera-buttons button{flex:1}
+#captureButton{background:#334155;color:white}#retakeButton{background:#e2e8f0;color:#1e293b}
+#submitButton{width:100%;background:#0b57d0;color:white;font-size:21px;padding:17px;margin-top:10px}
+.status{text-align:center;margin-top:11px;min-height:35px;font-size:15px}.error{color:#b91c1c}.success{color:#15803d}.loading{color:#475569}
+.hidden{display:none!important}#submitFrame{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;border:none}#submitForm{display:none}
+.info{color:#64748b;font-size:13px;line-height:1.5;margin:12px 0 0}
+.print-tools{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.print-tools button{background:#e2e8f0;color:#1e293b;font-size:13px;padding:9px 12px}
+@media(max-width:750px){body{display:block;padding:10px}.card{padding:17px}.form-layout{grid-template-columns:1fr;gap:5px}.camera-container{height:min(35vh,280px)}.header h1{font-size:24px}}
+@media(min-width:751px) and (max-height:660px){body{padding:5px}.card{padding:12px 22px}.header{margin-bottom:3px}.header h1{font-size:24px}.language{margin-bottom:6px}.camera-container{height:260px}.form-group{margin-bottom:10px}.form-group input{height:45px}#submitButton{padding:11px}}
 </style>
 </head>
 <body>
 <div class="container"><div class="card">
   <div class="header"><h1 id="pageTitle">Visitor Sign-In</h1><p id="pageSubtitle">Please enter your information below.</p></div>
-  <div class="language">
-    <button id="englishButton" type="button" class="active">English</button>
-    <button id="spanishButton" type="button">Español</button>
-  </div>
+  <div class="language"><button id="englishButton" class="active" type="button">English</button><button id="spanishButton" type="button">Español</button></div>
   <form id="visitorForm">
-    <div class="form-group"><label id="firstNameLabel" for="firstName">First Name</label><input id="firstName" type="text" autocomplete="off" maxlength="80" required></div>
-    <div class="form-group"><label id="lastNameLabel" for="lastName">Last Name</label><input id="lastName" type="text" autocomplete="off" maxlength="80" required></div>
-    <div class="camera-container">
-      <video id="video" autoplay playsinline muted></video>
-      <img id="photoPreview" alt="Visitor photo">
-      <canvas id="canvas" class="hidden"></canvas>
+    <div class="form-layout">
+      <div class="visitor-details">
+        <div class="form-group"><label id="firstNameLabel" for="firstName">First Name</label><input id="firstName" autocomplete="off" maxlength="80" required></div>
+        <div class="form-group"><label id="lastNameLabel" for="lastName">Last Name</label><input id="lastName" autocomplete="off" maxlength="80" required></div>
+        <p class="info" id="cameraHint">Take a photo using the camera to the right, then select Sign In.</p>
+        <button id="submitButton" type="submit">Sign In</button>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </div>
+      <div class="camera-side">
+        <div class="camera-container"><video id="video" autoplay playsinline muted></video><img id="photoPreview" alt="Visitor photo"><canvas id="canvas" class="hidden"></canvas></div>
+        <div class="camera-buttons"><button id="captureButton" type="button">Take Photo</button><button id="retakeButton" type="button" class="hidden">Retake Photo</button></div>
+      </div>
     </div>
-    <div class="camera-buttons">
-      <button id="captureButton" type="button">Take Photo</button>
-      <button id="retakeButton" type="button" class="hidden">Retake Photo</button>
-    </div>
-    <button id="submitButton" type="submit">Sign In</button>
-    <div id="status" class="status" role="status" aria-live="polite"></div>
   </form>
+  <div class="print-tools">
+    <button id="testPrintButton" type="button">Test Printer (No Check-In)</button>
+    <button id="reprintButton" type="button" class="hidden">Open Last Badge / Reprint</button>
+  </div>
 </div></div>
 
 <!-- Keep the same deployed Apps Script URL as your original file. -->
@@ -100,6 +95,7 @@ const translations = {
     processing:'Creating your visitor badge...', printing:'Sending badge to the printer...',
     complete:'Check-in saved. Your badge has been sent to the printer. Please check in with the secretary.',
     error:'Something went wrong. Please contact the secretary.',
+    hint:'Take a photo using the camera to the right, then select Sign In.',
     timeout:'The request timed out. Please ask the secretary to check whether your visit was recorded before trying again.'
   },
   es: {
@@ -110,6 +106,7 @@ const translations = {
     processing:'Creando su gafete de visitante...', printing:'Enviando el gafete a la impresora...',
     complete:'Registro guardado. Se envió el gafete a la impresora. Consulte con la secretaria.',
     error:'Ocurrió un error. Comuníquese con la secretaria.',
+    hint:'Tome una foto con la cámara a la derecha y después seleccione Registrarse.',
     timeout:'La solicitud tardó demasiado. Consulte con la secretaria antes de intentar de nuevo.'
   }
 };
@@ -120,6 +117,9 @@ let submitting = false;
 let resetHandle = null;
 let requestTimeoutHandle = null;
 let completionHandle = null;
+let printWindow = null;
+let lastBadgeHtml = '';
+const PRINT_WINDOW_NAME = 'visitor_badge_print';
 
 function t() { return translations[lang]; }
 function show(message, kind='') { statusBox.textContent = message; statusBox.className = 'status ' + kind; }
@@ -129,7 +129,7 @@ function setLanguage(value) {
   document.documentElement.lang = lang;
   const x = t();
   $('pageTitle').textContent=x.title; $('pageSubtitle').textContent=x.subtitle;
-  $('firstNameLabel').textContent=x.first; $('lastNameLabel').textContent=x.last;
+  $('firstNameLabel').textContent=x.first; $('lastNameLabel').textContent=x.last; $('cameraHint').textContent=x.hint;
   captureButton.textContent=x.capture; retakeButton.textContent=x.retake; submitButton.textContent=x.sign;
   $('englishButton').classList.toggle('active',lang==='en');
   $('spanishButton').classList.toggle('active',lang==='es');
@@ -190,6 +190,7 @@ visitorForm.addEventListener('submit', event=>{
   if (!firstName.value.trim()) { firstName.focus(); return; }
   if (!lastName.value.trim()) { lastName.focus(); return; }
   if (!photoDataUrl) { show(t().needPhoto,'error'); return; }
+  printWindow = openPrintWindow();
   submitting=true; clearTimeout(resetHandle); clearTimeout(completionHandle);
   lockForm(true); show(t().processing,'loading');
   $('submitFirstName').value=firstName.value.trim();
@@ -217,8 +218,10 @@ window.addEventListener('message',async event=>{
     submitting=false; lockForm(false); show(response.error||t().error,'error'); resetInactivityTimer(); return;
   }
   try {
-    await printBadge(response.badgeHtml);
-    show(t().complete,'success');
+    lastBadgeHtml = response.badgeHtml;
+    $('reprintButton').classList.remove('hidden');
+    await printBadge(response.badgeHtml, printWindow);
+    show('Check-in saved. Print request opened; verify the badge printed.','success');
     completionHandle=setTimeout(resetKiosk,4500);
   } catch (err) {
     console.error('Print failed:',err);
@@ -227,33 +230,61 @@ window.addEventListener('message',async event=>{
   }
 });
 
-async function printBadge(html) {
-  if (typeof html!=='string' || !html.includes('class="badge"')) throw new Error('Badge HTML missing');
-  show(t().printing,'loading');
-  const frame=document.createElement('iframe');
-  frame.id='printFrame'; frame.title='Visitor badge to print';
-  document.body.appendChild(frame);
+function openPrintWindow() {
+  // MUST run directly from a user click/submit; asynchronous opening is often blocked.
+  const w = window.open('', PRINT_WINDOW_NAME, 'popup=yes,width=850,height=500');
+  if (!w) { console.warn('Popup blocked by ChromeOS policy'); return null; }
   try {
-    const doc=frame.contentDocument;
-    doc.open(); doc.write(html); doc.close();
-    await Promise.race([
-      Promise.all(Array.from(doc.images).map(img=>img.decode?img.decode().catch(()=>{}):Promise.resolve())),
-      new Promise(resolve=>setTimeout(resolve,1800))
-    ]);
-    if (doc.fonts && doc.fonts.ready) await doc.fonts.ready;
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    frame.contentWindow.focus();
-    frame.contentWindow.print();
-    // ChromeOS doesn't expose a reliable print-success event to webpages.
-    await new Promise(resolve=>setTimeout(resolve,3000));
-  } finally {
-    frame.remove();
-  }
+    w.document.open();
+    w.document.write('<!doctype html><html><head><title>Visitor label — preparing</title></head><body style="font:20px Arial;padding:30px">Preparing label…</body></html>');
+    w.document.close();
+  } catch (e) { console.warn(e); }
+  return w;
 }
+
+async function printBadge(html, win) {
+  if (typeof html !== 'string' || !html.includes('class="badge"') && !html.includes('PRINT TEST'))
+    throw new Error('Badge HTML missing');
+  if (!win || win.closed) {
+    show('The print window was blocked. Allow pop-ups for this site or use Open Last Badge / Reprint.','error');
+    throw new Error('Print window blocked');
+  }
+  show(t().printing,'loading');
+  win.document.open(); win.document.write(html); win.document.close();
+  // Explicitly wait for the embedded visitor photo and fonts.
+  await Promise.race([
+    Promise.all(Array.from(win.document.images).map(img => img.decode ? img.decode().catch(()=>{}) : Promise.resolve())),
+    new Promise(resolve=>setTimeout(resolve,5000))
+  ]);
+  if (win.document.fonts && win.document.fonts.ready) await win.document.fonts.ready;
+  await new Promise(resolve=>setTimeout(resolve,250));
+  if (win.closed) throw new Error('Print window closed');
+  win.focus();
+  win.print();
+  // Window deliberately stays open for debugging; do not claim actual paper printed.
+}
+
+$('reprintButton').addEventListener('click',async()=>{
+  if (!lastBadgeHtml) return;
+  const w=openPrintWindow();
+  try { await printBadge(lastBadgeHtml,w); show('Print request opened. Check the printer queue.','success'); }
+  catch (e) { console.error(e); show('Printer window blocked or failed: '+e.message,'error'); }
+});
+
+$('testPrintButton').addEventListener('click',async()=>{
+  const w=openPrintWindow();
+  const testHtml=`<!doctype html><html><head><meta charset="utf-8"><title>Print test</title>
+  <style>@page{size:90.3mm 29mm;margin:0}*{box-sizing:border-box}html,body{width:90.3mm;height:29mm;margin:0;overflow:hidden;font-family:Arial}
+  .badge{width:90.3mm;height:29mm;padding:3mm 4mm}.label{font-size:16pt;font-weight:900}.small{font-size:10pt;margin-top:2mm}</style></head>
+  <body><div class="badge"><div class="label">VISITOR PRINT TEST</div><div class="small">DK-1201 · 90.3 × 29 mm</div></div></body></html>`;
+  try { await printBadge(testHtml,w); show('Print test requested. Check queue / printer.','success'); }
+  catch(e) { console.error(e); show('Print test failed: '+e.message,'error'); }
+});
 
 function resetKiosk() {
   if (submitting && !completionHandle) return;
   submitting=false; clearTimeout(requestTimeoutHandle); clearTimeout(completionHandle);
+  lastBadgeHtml=''; $('reprintButton').classList.add('hidden');
   visitorForm.reset(); photoDataUrl=''; preview.removeAttribute('src');
   preview.style.display='none'; video.style.display='block';
   captureButton.classList.remove('hidden'); retakeButton.classList.add('hidden');
@@ -272,33 +303,6 @@ setLanguage('en');
 startCamera();
 resetInactivityTimer();
 
-// Optional printer-only diagnostic without creating a Sheet/Drive visitor entry.
-// Open the kiosk page with ?printtest=1 and click the test button.
-if (new URLSearchParams(location.search).get('printtest')==='1') {
-  const test=document.createElement('button');
-  test.type='button'; test.textContent='Print 29 × 90.3 mm test label';
-  test.style.cssText='display:block;margin:14px auto;background:#555;color:white';
-  document.querySelector('.card').appendChild(test);
-  test.addEventListener('click',async()=>{
-    test.disabled=true;
-    const testHtml=`<!doctype html><html><head><style>
-      @page{size:90.3mm 29mm;margin:0}html,body{margin:0;width:90.3mm;height:29mm;overflow:hidden}
-      body{font:700 15pt Arial;box-sizing:border-box;padding:4mm}
-      small{display:block;font:9pt Arial;margin-top:2mm}
-      </style></head><body>VISITOR PRINT TEST<small>DK-1201 · 90.3 × 29 mm</small></body></html>`;
-    try {
-      show('Sending test label...','loading');
-      // Same printing procedure; no visitor is submitted.
-      const f=document.createElement('iframe'); f.id='printFrame'; document.body.appendChild(f);
-      f.contentDocument.open(); f.contentDocument.write(testHtml); f.contentDocument.close();
-      await new Promise(resolve=>setTimeout(resolve,400));
-      f.contentWindow.focus(); f.contentWindow.print();
-      await new Promise(resolve=>setTimeout(resolve,3000));
-      f.remove(); show('Test print command sent. Check the printer.','success');
-    } catch(err) { console.error(err); show('Test print failed.','error'); }
-    test.disabled=false;
-  });
-}
 </script>
 </body>
 </html>
