@@ -121,6 +121,8 @@ let completionHandle = null;
 let printWindow = null;
 let activeRequestId = null;
 let lastBadgeHtml = '';
+let printSucceeded = false;
+let recordSaved = false;
 const PRINT_WINDOW_NAME = 'visitor_badge_print';
 
 function t() { return translations[lang]; }
@@ -192,12 +194,27 @@ visitorForm.addEventListener('submit', event=>{
   if (!firstName.value.trim()) { firstName.focus(); return; }
   if (!lastName.value.trim()) { lastName.focus(); return; }
   if (!photoDataUrl) { show(t().needPhoto,'error'); return; }
+  // Generate the badge directly on this Chromebook. Printing no longer waits
+  // for the Google Apps Script response, which may be delayed or blocked.
   printWindow = openPrintWindow();
+  const localBadge = buildLocalBadge(firstName.value.trim(),lastName.value.trim(),photoDataUrl,lang);
+  lastBadgeHtml = localBadge;
+  $('reprintButton').classList.remove('hidden');
+  printSucceeded = false;
+  recordSaved = false;
+  void printBadge(localBadge,printWindow).then(()=>{
+    printSucceeded = true;
+    if (!recordSaved) show(submitting ? 'Print command sent. Saving visitor record…' :
+      'Print command sent. Check the printer queue.','loading');
+  }).catch(err=>{
+    console.error('Local badge print:',err);
+    show('Print was not started: '+err.message+'. Use Open Last Badge / Reprint.','error');
+  });
   activeRequestId = (typeof crypto !== 'undefined' && crypto.randomUUID)
     ? crypto.randomUUID() : String(Date.now()) + '-' + Math.random().toString(36).slice(2);
   $('submitRequestId').value=activeRequestId;
   submitting=true; clearTimeout(resetHandle); clearTimeout(completionHandle);
-  lockForm(true); show(t().processing,'loading');
+  lockForm(true); show('Printing badge and saving visitor…','loading');
   $('submitFirstName').value=firstName.value.trim();
   $('submitLastName').value=lastName.value.trim();
   $('submitPhotoDataUrl').value=photoDataUrl;
@@ -205,7 +222,8 @@ visitorForm.addEventListener('submit', event=>{
   $('submitLang').value=lang;
   requestTimeoutHandle=setTimeout(()=>{
     // Do not automatically resubmit: the backend may already have saved the visitor.
-    submitting=false; activeRequestId=null; lockForm(false); show(t().timeout,'error'); resetInactivityTimer();
+    submitting=false; activeRequestId=null; lockForm(false);
+    show('Badge printing was requested, but record-saving confirmation was not received. Check Google Sheets before retrying.','error'); resetInactivityTimer();
   },SUBMISSION_TIMEOUT_MS);
   submitForm.submit();
 });
@@ -223,21 +241,46 @@ window.addEventListener('message',async event=>{
       response.requestId !== activeRequestId || typeof response.ok!=='boolean') return;
   clearTimeout(requestTimeoutHandle);
   if (!response.ok) {
-    submitting=false; activeRequestId=null; lockForm(false); show(response.error||t().error,'error'); resetInactivityTimer(); return;
+    submitting=false; activeRequestId=null; lockForm(false); show('Visitor record could not be confirmed: '+(response.error||t().error),'error'); resetInactivityTimer(); return;
   }
-  try {
-    show('Visitor saved. Preparing print window…','loading');
-    lastBadgeHtml = response.badgeHtml;
-    $('reprintButton').classList.remove('hidden');
-    await printBadge(response.badgeHtml, printWindow);
-    show('Check-in saved. Print command sent; check the printer queue.','success');
-    completionHandle=setTimeout(resetKiosk,4500);
-  } catch (err) {
-    console.error('Print failed:',err);
-    show(t().error + ' Your check-in may already be saved.','error');
-    submitting=false; activeRequestId=null; lockForm(false); resetInactivityTimer();
-  }
+  // The browser already generated and printed this exact check-in badge.
+  // Never print again on receipt; this avoids duplicate labels.
+  recordSaved = true;
+  submitting = false;
+  activeRequestId = null;
+  lockForm(false);
+  show('Visitor record saved. Badge print was requested; check the printer queue.','success');
+  completionHandle=setTimeout(resetKiosk,8000);
 });
+
+function escapeText(value) {
+  return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function buildLocalBadge(first,last,photo,language) {
+  const fullName = (first+' '+last).trim();
+  const smallName = fullName.length > 27;
+  const visitor = language==='es'?'VISITANTE':'VISITOR';
+  const prefix = language==='es'?'Entrada:':'Check-in:';
+  const stamp = new Intl.DateTimeFormat(language==='es'?'es-US':'en-US',{
+    month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'
+  }).format(new Date());
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Visitor Badge</title>
+<style>
+@page{size:90.3mm 29mm;margin:0}
+*{box-sizing:border-box}
+html,body{width:90.3mm;height:29mm;margin:0;padding:0;overflow:hidden;background:white}
+body{font-family:Arial,Helvetica,sans-serif;color:black;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.badge{display:flex;align-items:center;width:100%;height:100%;padding:1.6mm 2mm;gap:2.7mm}
+.photo{display:block;width:25.4mm;height:25.4mm;object-fit:cover;flex:0 0 25.4mm;border:.2mm solid #444}
+.details{min-width:0;flex:1;overflow:hidden}
+.kind{font-size:10pt;font-weight:900;letter-spacing:.5mm;line-height:1.1;margin-bottom:1.2mm}
+.name{font-size:${smallName?'12':'15'}pt;font-weight:800;line-height:1.04;overflow-wrap:anywhere;max-height:13mm;overflow:hidden}
+.time{font-size:7.5pt;margin-top:1.3mm;line-height:1.12;white-space:nowrap}
+</style></head><body><div class="badge"><img class="photo" src="${photo}" alt="">
+<div class="details"><div class="kind">${visitor}</div><div class="name">${escapeText(fullName)}</div>
+<div class="time">${prefix} ${escapeText(stamp)}</div></div></div></body></html>`;
+}
 
 function openPrintWindow() {
   // MUST run directly from a user click/submit; asynchronous opening is often blocked.
@@ -293,7 +336,7 @@ $('testPrintButton').addEventListener('click',async()=>{
 function resetKiosk() {
   if (submitting && !completionHandle) return;
   submitting=false; activeRequestId=null; clearTimeout(requestTimeoutHandle); clearTimeout(completionHandle);
-  lastBadgeHtml=''; $('reprintButton').classList.add('hidden');
+  lastBadgeHtml=''; printSucceeded=false; recordSaved=false; $('reprintButton').classList.add('hidden');
   visitorForm.reset(); photoDataUrl=''; preview.removeAttribute('src');
   preview.style.display='none'; video.style.display='block';
   captureButton.classList.remove('hidden'); retakeButton.classList.add('hidden');
