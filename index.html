@@ -1,1619 +1,304 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Visitor Sign-In</title>
-
 <style>
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-
-  margin: 0;
-  padding: 0;
-
-  width: 100%;
-  height: 100%;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
-  background: #f5f6f8;
-
-}
-
-body {
-
-  display: flex;
-
-  justify-content: center;
-
-  align-items: center;
-
-}
-
-.container {
-
-  width: 100%;
-
-  max-width: 650px;
-
-  padding: 30px;
-
-}
-
-.card {
-
-  background: white;
-
-  border-radius: 18px;
-
-  padding: 35px;
-
-  box-shadow:
-    0 8px 30px rgba(
-      0,
-      0,
-      0,
-      0.10
-    );
-
-}
-
-.header {
-
-  text-align: center;
-
-  margin-bottom: 25px;
-
-}
-
-.header h1 {
-
-  margin: 0;
-
-  font-size: 32px;
-
-}
-
-.header p {
-
-  margin: 8px 0 0;
-
-  color: #666;
-
-  font-size: 16px;
-
-}
-
-.language {
-
-  display: flex;
-
-  justify-content: center;
-
-  gap: 10px;
-
-  margin-bottom: 25px;
-
-}
-
-.language button {
-
-  border: 1px solid #ccc;
-
-  background: white;
-
-  padding: 8px 16px;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  font-size: 14px;
-
-}
-
-.language button.active {
-
-  background: #222;
-
-  color: white;
-
-  border-color: #222;
-
-}
-
-.form-group {
-
-  margin-bottom: 20px;
-
-}
-
-.form-group label {
-
-  display: block;
-
-  margin-bottom: 7px;
-
-  font-weight: bold;
-
-  font-size: 16px;
-
-}
-
-.form-group input {
-
-  width: 100%;
-
-  padding: 14px;
-
-  border:
-
-    1px solid #ccc;
-
-  border-radius: 9px;
-
-  font-size: 18px;
-
-}
-
-.camera-section {
-
-  margin-top: 25px;
-
-}
-
-.camera-container {
-
-  position: relative;
-
-  width: 100%;
-
-  background: #111;
-
-  border-radius: 12px;
-
-  overflow: hidden;
-
-  aspect-ratio: 4 / 3;
-
-}
-
-#video {
-
-  width: 100%;
-
-  height: 100%;
-
-  object-fit: cover;
-
-  display: block;
-
-}
-
-#photoPreview {
-
-  width: 100%;
-
-  height: 100%;
-
-  object-fit: cover;
-
-  display: none;
-
-}
-
-.camera-buttons {
-
-  display: flex;
-
-  gap: 10px;
-
-  margin-top: 12px;
-
-}
-
-.camera-buttons button {
-
-  flex: 1;
-
-}
-
-button {
-
-  border: none;
-
-  border-radius: 9px;
-
-  padding: 14px 18px;
-
-  font-size: 17px;
-
-  font-weight: bold;
-
-  cursor: pointer;
-
-}
-
-#captureButton {
-
-  background: #333;
-
-  color: white;
-
-}
-
-#retakeButton {
-
-  background: #ddd;
-
-  color: #222;
-
-}
-
-#submitButton {
-
-  width: 100%;
-
-  margin-top: 25px;
-
-  background: #0b57d0;
-
-  color: white;
-
-  font-size: 19px;
-
-  padding: 17px;
-
-}
-
-button:disabled {
-
-  opacity: 0.5;
-
-  cursor: not-allowed;
-
-}
-
-.status {
-
-  margin-top: 20px;
-
-  text-align: center;
-
-  min-height: 25px;
-
-  font-size: 16px;
-
-}
-
-.success {
-
-  color: #188038;
-
-}
-
-.error {
-
-  color: #d93025;
-
-}
-
-.loading {
-
-  color: #555;
-
-}
-
-.hidden {
-
-  display: none !important;
-
-}
-
-/*
- * Hidden form used to POST to Apps Script.
- *
- * This avoids the CORS problems that occurred
- * when using fetch() from GitHub Pages.
- */
-
-#submitFrame {
-
-  width: 1px;
-
-  height: 1px;
-
-  border: 0;
-
-  position: absolute;
-
-  left: -10000px;
-
-  top: -10000px;
-
-}
-
-#submitForm {
-
-  display: none;
-
-}
-
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; font-family: Arial, Helvetica, sans-serif; background: #f5f6f8; }
+  body { display: flex; justify-content: center; align-items: flex-start; padding: 24px 12px; }
+  .container { width: 100%; max-width: 650px; }
+  .card { background: white; border-radius: 18px; padding: 30px; box-shadow: 0 8px 30px #00000018; }
+  .header { text-align: center; margin-bottom: 24px; }
+  .header h1 { font-size: 32px; margin: 0; }
+  .header p { color: #666; font-size: 16px; margin: 8px 0 0; }
+  .language { display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; }
+  button { border: 0; border-radius: 9px; padding: 14px 18px; font-size: 17px; font-weight: bold; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .language button { border: 1px solid #ccc; background: white; padding: 8px 16px; font-size: 14px; }
+  .language button.active { background: #222; color: white; border-color: #222; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; margin-bottom: 7px; font-weight: bold; font-size: 16px; }
+  .form-group input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 9px; font-size: 18px; }
+  .camera-container { width: 100%; position: relative; aspect-ratio: 4/3; background: #111; border-radius: 12px; overflow: hidden; }
+  #video, #photoPreview { width: 100%; height: 100%; object-fit: cover; }
+  #photoPreview { display: none; }
+  .camera-buttons { display: flex; gap: 10px; margin-top: 12px; }
+  .camera-buttons button { flex: 1; }
+  #captureButton { background: #333; color: white; }
+  #retakeButton { background: #ddd; color: #222; }
+  #submitButton { width: 100%; margin-top: 25px; color: white; background: #0b57d0; padding: 17px; font-size: 19px; }
+  .status { text-align: center; margin-top: 20px; min-height: 25px; font-size: 16px; }
+  .error { color: #d93025; }
+  .success { color: #188038; }
+  .loading { color: #555; }
+  .hidden { display: none !important; }
+  #submitFrame, #printFrame { position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; border: none; }
+  #submitForm { display: none; }
+  @media (max-width: 500px) { .card { padding: 20px; } }
 </style>
-
 </head>
-
-
 <body>
-
-
-<div class="container">
-
-  <div class="card">
-
-    <div class="header">
-
-      <h1 id="pageTitle">
-        Visitor Sign-In
-      </h1>
-
-      <p id="pageSubtitle">
-        Please enter your information below.
-      </p>
-
-    </div>
-
-
-    <div class="language">
-
-      <button
-        id="englishButton"
-        class="active"
-        type="button"
-      >
-        English
-      </button>
-
-      <button
-        id="spanishButton"
-        type="button"
-      >
-        Español
-      </button>
-
-    </div>
-
-
-    <form id="visitorForm">
-
-      <div class="form-group">
-
-        <label
-          id="firstNameLabel"
-          for="firstName"
-        >
-          First Name
-        </label>
-
-        <input
-          id="firstName"
-          name="firstName"
-          type="text"
-          autocomplete="off"
-          required
-        >
-
-      </div>
-
-
-      <div class="form-group">
-
-        <label
-          id="lastNameLabel"
-          for="lastName"
-        >
-          Last Name
-        </label>
-
-        <input
-          id="lastName"
-          name="lastName"
-          type="text"
-          autocomplete="off"
-          required
-        >
-
-      </div>
-
-
-      <div class="camera-section">
-
-        <div class="camera-container">
-
-          <video
-            id="video"
-            autoplay
-            playsinline
-            muted
-          ></video>
-
-          <img
-            id="photoPreview"
-            alt="Visitor photo"
-          >
-
-        </div>
-
-
-        <canvas
-          id="canvas"
-          class="hidden"
-        ></canvas>
-
-
-        <div class="camera-buttons">
-
-          <button
-            id="captureButton"
-            type="button"
-          >
-            Take Photo
-          </button>
-
-          <button
-            id="retakeButton"
-            type="button"
-            class="hidden"
-          >
-            Retake Photo
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <button
-        id="submitButton"
-        type="submit"
-      >
-        Sign In
-      </button>
-
-
-      <div
-        id="status"
-        class="status"
-      ></div>
-
-    </form>
-
+<div class="container"><div class="card">
+  <div class="header"><h1 id="pageTitle">Visitor Sign-In</h1><p id="pageSubtitle">Please enter your information below.</p></div>
+  <div class="language">
+    <button id="englishButton" type="button" class="active">English</button>
+    <button id="spanishButton" type="button">Español</button>
   </div>
+  <form id="visitorForm">
+    <div class="form-group"><label id="firstNameLabel" for="firstName">First Name</label><input id="firstName" type="text" autocomplete="off" maxlength="80" required></div>
+    <div class="form-group"><label id="lastNameLabel" for="lastName">Last Name</label><input id="lastName" type="text" autocomplete="off" maxlength="80" required></div>
+    <div class="camera-container">
+      <video id="video" autoplay playsinline muted></video>
+      <img id="photoPreview" alt="Visitor photo">
+      <canvas id="canvas" class="hidden"></canvas>
+    </div>
+    <div class="camera-buttons">
+      <button id="captureButton" type="button">Take Photo</button>
+      <button id="retakeButton" type="button" class="hidden">Retake Photo</button>
+    </div>
+    <button id="submitButton" type="submit">Sign In</button>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+  </form>
+</div></div>
 
-</div>
-
-
-<!--
-  Hidden Apps Script submission iframe.
--->
-<iframe
-  name="submitFrame"
-  id="submitFrame"
-></iframe>
-
-
-<!--
-  Hidden form used to submit visitor information.
--->
-<form
-  id="submitForm"
-  method="POST"
-  target="submitFrame"
-  action="https://script.google.com/macros/s/AKfycbwK8NN2n4WPj4yQrfqugJR9YYzv49TiCYqloDUgMppZ2PUduB0Se85ZI_U5FKeO5Pal/exec"
->
-
-  <input
-    type="hidden"
-    name="firstName"
-    id="submitFirstName"
-  >
-
-  <input
-    type="hidden"
-    name="lastName"
-    id="submitLastName"
-  >
-
-  <input
-    type="hidden"
-    name="photoDataUrl"
-    id="submitPhotoDataUrl"
-  >
-
-  <input
-    type="hidden"
-    name="device"
-    id="submitDevice"
-  >
-
-  <input
-    type="hidden"
-    name="lang"
-    id="submitLang"
-  >
-
+<!-- Keep the same deployed Apps Script URL as your original file. -->
+<iframe id="submitFrame" name="submitFrame" title="Submission response"></iframe>
+<form id="submitForm" target="submitFrame" method="POST"
+  action="https://script.google.com/macros/s/AKfycbwK8NN2n4WPj4yQrfqugJR9YYzv49TiCYqloDUgMppZ2PUduB0Se85ZI_U5FKeO5Pal/exec">
+  <input type="hidden" name="firstName" id="submitFirstName">
+  <input type="hidden" name="lastName" id="submitLastName">
+  <input type="hidden" name="photoDataUrl" id="submitPhotoDataUrl">
+  <input type="hidden" name="device" id="submitDevice">
+  <input type="hidden" name="lang" id="submitLang">
 </form>
 
-
 <script>
-
-
-/* ============================================================
-   CONFIGURATION
-   ============================================================ */
-
-const RESET_TIME = 120000;
-
-
-/* ============================================================
-   ELEMENTS
-   ============================================================ */
-
-const visitorForm =
-  document.getElementById(
-    "visitorForm"
-  );
-
-const firstName =
-  document.getElementById(
-    "firstName"
-  );
-
-const lastName =
-  document.getElementById(
-    "lastName"
-  );
-
-const video =
-  document.getElementById(
-    "video"
-  );
-
-const canvas =
-  document.getElementById(
-    "canvas"
-  );
-
-const photoPreview =
-  document.getElementById(
-    "photoPreview"
-  );
-
-const captureButton =
-  document.getElementById(
-    "captureButton"
-  );
-
-const retakeButton =
-  document.getElementById(
-    "retakeButton"
-  );
-
-const submitButton =
-  document.getElementById(
-    "submitButton"
-  );
-
-const status =
-  document.getElementById(
-    "status"
-  );
-
-const submitForm =
-  document.getElementById(
-    "submitForm"
-  );
-
-const submitFirstName =
-  document.getElementById(
-    "submitFirstName"
-  );
-
-const submitLastName =
-  document.getElementById(
-    "submitLastName"
-  );
-
-const submitPhotoDataUrl =
-  document.getElementById(
-    "submitPhotoDataUrl"
-  );
-
-const submitDevice =
-  document.getElementById(
-    "submitDevice"
-  );
-
-const submitLang =
-  document.getElementById(
-    "submitLang"
-  );
-
-const englishButton =
-  document.getElementById(
-    "englishButton"
-  );
-
-const spanishButton =
-  document.getElementById(
-    "spanishButton"
-  );
-
-
-/* ============================================================
-   LANGUAGE
-   ============================================================ */
-
-let currentLanguage = "en";
-
-
+'use strict';
+const RESET_TIME_MS = 120000;
+const SUBMISSION_TIMEOUT_MS = 45000;
+const $ = id => document.getElementById(id);
+const visitorForm = $('visitorForm');
+const firstName = $('firstName');
+const lastName = $('lastName');
+const video = $('video');
+const canvas = $('canvas');
+const preview = $('photoPreview');
+const captureButton = $('captureButton');
+const retakeButton = $('retakeButton');
+const submitButton = $('submitButton');
+const statusBox = $('status');
+const submitForm = $('submitForm');
+const submitFrame = $('submitFrame');
 const translations = {
-
   en: {
-
-    title:
-      "Visitor Sign-In",
-
-    subtitle:
-      "Please enter your information below.",
-
-    firstName:
-      "First Name",
-
-    lastName:
-      "Last Name",
-
-    takePhoto:
-      "Take Photo",
-
-    retake:
-      "Retake Photo",
-
-    signIn:
-      "Sign In",
-
-    startingCamera:
-      "Starting camera...",
-
-    cameraReady:
-      "Camera ready.",
-
-    cameraError:
-      "Unable to access the camera. Please check camera permissions.",
-
-    photoTaken:
-      "Photo captured.",
-
-    processing:
-      "Creating your visitor badge...",
-
-    printing:
-      "Printing visitor badge...",
-
-    complete:
-      "Done. Please check in with the secretary.",
-
-    error:
-      "Something went wrong. Please contact the secretary."
-
+    title:'Visitor Sign-In', subtitle:'Please enter your information below.',
+    first:'First Name', last:'Last Name', capture:'Take Photo', retake:'Retake Photo', sign:'Sign In',
+    starting:'Starting camera...', ready:'Camera ready.', cameraError:'Unable to access the camera. Please check camera permissions.',
+    captured:'Photo captured.', needPhoto:'Please take a photo first.',
+    processing:'Creating your visitor badge...', printing:'Sending badge to the printer...',
+    complete:'Check-in saved. Your badge has been sent to the printer. Please check in with the secretary.',
+    error:'Something went wrong. Please contact the secretary.',
+    timeout:'The request timed out. Please ask the secretary to check whether your visit was recorded before trying again.'
   },
-
-
   es: {
-
-    title:
-      "Registro de Visitantes",
-
-    subtitle:
-      "Ingrese su información a continuación.",
-
-    firstName:
-      "Nombre",
-
-    lastName:
-      "Apellido",
-
-    takePhoto:
-      "Tomar Foto",
-
-    retake:
-      "Tomar Otra Foto",
-
-    signIn:
-      "Registrarse",
-
-    startingCamera:
-      "Iniciando cámara...",
-
-    cameraReady:
-      "Cámara lista.",
-
-    cameraError:
-      "No se pudo acceder a la cámara. Revise los permisos de la cámara.",
-
-    photoTaken:
-      "Foto tomada.",
-
-    processing:
-      "Creando su gafete de visitante...",
-
-    printing:
-      "Imprimiendo gafete de visitante...",
-
-    complete:
-      "Listo. Por favor, regístrese con la secretaria.",
-
-    error:
-      "Algo salió mal. Por favor, comuníquese con la secretaria."
-
+    title:'Registro de Visitantes', subtitle:'Ingrese su información a continuación.',
+    first:'Nombre', last:'Apellido', capture:'Tomar Foto', retake:'Tomar Otra Foto', sign:'Registrarse',
+    starting:'Iniciando cámara...', ready:'Cámara lista.', cameraError:'No se pudo acceder a la cámara. Revise los permisos.',
+    captured:'Foto tomada.', needPhoto:'Primero tome una foto.',
+    processing:'Creando su gafete de visitante...', printing:'Enviando el gafete a la impresora...',
+    complete:'Registro guardado. Se envió el gafete a la impresora. Consulte con la secretaria.',
+    error:'Ocurrió un error. Comuníquese con la secretaria.',
+    timeout:'La solicitud tardó demasiado. Consulte con la secretaria antes de intentar de nuevo.'
   }
-
 };
+let lang = 'en';
+let stream = null;
+let photoDataUrl = '';
+let submitting = false;
+let resetHandle = null;
+let requestTimeoutHandle = null;
+let completionHandle = null;
 
-
-function setLanguage(lang) {
-
-  currentLanguage =
-    lang === "es"
-      ? "es"
-      : "en";
-
-  const t =
-    translations[currentLanguage];
-
-
-  document.documentElement.lang =
-    currentLanguage;
-
-
-  document.getElementById(
-    "pageTitle"
-  ).textContent = t.title;
-
-
-  document.getElementById(
-    "pageSubtitle"
-  ).textContent = t.subtitle;
-
-
-  document.getElementById(
-    "firstNameLabel"
-  ).textContent = t.firstName;
-
-
-  document.getElementById(
-    "lastNameLabel"
-  ).textContent = t.lastName;
-
-
-  captureButton.textContent =
-    t.takePhoto;
-
-
-  retakeButton.textContent =
-    t.retake;
-
-
-  submitButton.textContent =
-    t.signIn;
-
-
-  englishButton.classList.toggle(
-    "active",
-    currentLanguage === "en"
-  );
-
-
-  spanishButton.classList.toggle(
-    "active",
-    currentLanguage === "es"
-  );
-
+function t() { return translations[lang]; }
+function show(message, kind='') { statusBox.textContent = message; statusBox.className = 'status ' + kind; }
+function setLanguage(value) {
+  if (submitting) return;
+  lang = value === 'es' ? 'es' : 'en';
+  document.documentElement.lang = lang;
+  const x = t();
+  $('pageTitle').textContent=x.title; $('pageSubtitle').textContent=x.subtitle;
+  $('firstNameLabel').textContent=x.first; $('lastNameLabel').textContent=x.last;
+  captureButton.textContent=x.capture; retakeButton.textContent=x.retake; submitButton.textContent=x.sign;
+  $('englishButton').classList.toggle('active',lang==='en');
+  $('spanishButton').classList.toggle('active',lang==='es');
 }
-
-
-englishButton.addEventListener(
-  "click",
-  () => setLanguage("en")
-);
-
-
-spanishButton.addEventListener(
-  "click",
-  () => setLanguage("es")
-);
-
-
-/* ============================================================
-   CAMERA
-   ============================================================ */
-
-let cameraStream = null;
-
-let capturedPhotoDataUrl = "";
-
+$('englishButton').addEventListener('click',()=>setLanguage('en'));
+$('spanishButton').addEventListener('click',()=>setLanguage('es'));
 
 async function startCamera() {
-
-  const t =
-    translations[currentLanguage];
-
-  status.textContent =
-    t.startingCamera;
-
-  status.className =
-    "status loading";
-
-
+  if (stream && stream.getVideoTracks().some(track=>track.readyState==='live')) {
+    video.srcObject=stream;
+    try { await video.play(); } catch (_) {}
+    return;
+  }
+  show(t().starting,'loading');
   try {
-
-    cameraStream =
-      await navigator.mediaDevices.getUserMedia({
-
-        video: {
-
-          facingMode: {
-            ideal: "environment"
-          },
-
-          width: {
-            ideal: 1280
-          },
-
-          height: {
-            ideal: 720
-          }
-
-        },
-
-        audio: false
-
-      });
-
-
-    video.srcObject =
-      cameraStream;
-
-
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:'user', width:{ideal:1280}, height:{ideal:720} }, audio:false
+    });
+    video.srcObject=stream;
     await video.play();
-
-
-    status.textContent =
-      t.cameraReady;
-
-    status.className =
-      "status";
-
-
-  } catch (error) {
-
-    console.error(
-      "Camera error:",
-      error
-    );
-
-    status.textContent =
-      t.cameraError;
-
-    status.className =
-      "status error";
-
+    show(t().ready);
+  } catch (err) {
+    console.error('Camera:',err);
+    show(t().cameraError,'error');
   }
-
 }
-
-
-/* ============================================================
-   CAPTURE PHOTO
-   ============================================================ */
-
-captureButton.addEventListener(
-  "click",
-  capturePhoto
-);
-
-
 function capturePhoto() {
-
-  if (
-    !video.videoWidth ||
-    !video.videoHeight
-  ) {
-
-    status.textContent =
-      "Camera is not ready.";
-
-    status.className =
-      "status error";
-
-    return;
-  }
-
-
-  const maxWidth = 700;
-
-  let width =
-    video.videoWidth;
-
-  let height =
-    video.videoHeight;
-
-
-  if (width > maxWidth) {
-
-    height =
-      Math.round(
-        height *
-        (maxWidth / width)
-      );
-
-    width =
-      maxWidth;
-  }
-
-
-  canvas.width =
-    width;
-
-  canvas.height =
-    height;
-
-
-  const ctx =
-    canvas.getContext("2d");
-
-
-  ctx.drawImage(
-    video,
-    0,
-    0,
-    width,
-    height
-  );
-
-
-  capturedPhotoDataUrl =
-    canvas.toDataURL(
-      "image/jpeg",
-      0.72
-    );
-
-
-  photoPreview.src =
-    capturedPhotoDataUrl;
-
-
-  video.style.display =
-    "none";
-
-  photoPreview.style.display =
-    "block";
-
-
-  captureButton.classList.add(
-    "hidden"
-  );
-
-  retakeButton.classList.remove(
-    "hidden"
-  );
-
-
-  const t =
-    translations[currentLanguage];
-
-
-  status.textContent =
-    t.photoTaken;
-
-  status.className =
-    "status";
-
-
-  resetTimer();
-
+  if (submitting) return;
+  if (!video.videoWidth || !video.videoHeight) { show(t().cameraError,'error'); return; }
+  const width=Math.min(700,video.videoWidth);
+  const height=Math.round(video.videoHeight * width / video.videoWidth);
+  canvas.width=width; canvas.height=height;
+  canvas.getContext('2d').drawImage(video,0,0,width,height);
+  photoDataUrl=canvas.toDataURL('image/jpeg',.72);
+  preview.src=photoDataUrl;
+  preview.style.display='block'; video.style.display='none';
+  captureButton.classList.add('hidden'); retakeButton.classList.remove('hidden');
+  show(t().captured); resetInactivityTimer();
 }
+function retakePhoto() {
+  if (submitting) return;
+  photoDataUrl=''; preview.removeAttribute('src');
+  preview.style.display='none'; video.style.display='block';
+  captureButton.classList.remove('hidden'); retakeButton.classList.add('hidden');
+  show(t().ready); resetInactivityTimer();
+}
+captureButton.addEventListener('click',capturePhoto);
+retakeButton.addEventListener('click',retakePhoto);
 
+function lockForm(locked) {
+  submitButton.disabled=locked; captureButton.disabled=locked; retakeButton.disabled=locked;
+  firstName.disabled=locked; lastName.disabled=locked;
+  $('englishButton').disabled=locked; $('spanishButton').disabled=locked;
+}
+visitorForm.addEventListener('submit', event=>{
+  event.preventDefault();
+  if (submitting) return;
+  if (!firstName.value.trim()) { firstName.focus(); return; }
+  if (!lastName.value.trim()) { lastName.focus(); return; }
+  if (!photoDataUrl) { show(t().needPhoto,'error'); return; }
+  submitting=true; clearTimeout(resetHandle); clearTimeout(completionHandle);
+  lockForm(true); show(t().processing,'loading');
+  $('submitFirstName').value=firstName.value.trim();
+  $('submitLastName').value=lastName.value.trim();
+  $('submitPhotoDataUrl').value=photoDataUrl;
+  $('submitDevice').value=navigator.userAgent;
+  $('submitLang').value=lang;
+  requestTimeoutHandle=setTimeout(()=>{
+    // Do not automatically resubmit: the backend may already have saved the visitor.
+    submitting=false; lockForm(false); show(t().timeout,'error'); resetInactivityTimer();
+  },SUBMISSION_TIMEOUT_MS);
+  submitForm.submit();
+});
 
-/* ============================================================
-   RETAKE PHOTO
-   ============================================================ */
-
-retakeButton.addEventListener(
-  "click",
-  () => {
-
-    capturedPhotoDataUrl = "";
-
-    photoPreview.src = "";
-
-    photoPreview.style.display =
-      "none";
-
-    video.style.display =
-      "block";
-
-    captureButton.classList.remove(
-      "hidden"
-    );
-
-    retakeButton.classList.add(
-      "hidden"
-    );
-
-    const t =
-      translations[currentLanguage];
-
-    status.textContent =
-      t.cameraReady;
-
-    status.className =
-      "status";
-
-    resetTimer();
-
+window.addEventListener('message',async event=>{
+  // A reply must come from the specific iframe used to submit this form.
+  if (event.source !== submitFrame.contentWindow || !submitting) return;
+  // Apps Script may serve HTML through googleusercontent.com after redirects.
+  if (!/^https:\/\/(?:[a-z0-9-]+\.)*(?:googleusercontent\.com|google\.com)$/.test(event.origin)) return;
+  let response;
+  try { response=typeof event.data==='string'?JSON.parse(event.data):event.data; } catch (_) { return; }
+  if (!response || response.type!=='visitor-kiosk-result' || typeof response.ok!=='boolean') return;
+  clearTimeout(requestTimeoutHandle);
+  if (!response.ok) {
+    submitting=false; lockForm(false); show(response.error||t().error,'error'); resetInactivityTimer(); return;
   }
-);
-
-
-/* ============================================================
-   SUBMIT VISITOR
-   ============================================================ */
-
-visitorForm.addEventListener(
-  "submit",
-  async function(event) {
-
-    event.preventDefault();
-
-
-    if (!firstName.value.trim()) {
-
-      firstName.focus();
-
-      return;
-    }
-
-
-    if (!lastName.value.trim()) {
-
-      lastName.focus();
-
-      return;
-    }
-
-
-    if (!capturedPhotoDataUrl) {
-
-      status.textContent =
-        "Please take a photo first.";
-
-      status.className =
-        "status error";
-
-      return;
-    }
-
-
-    const t =
-      translations[currentLanguage];
-
-
-    submitButton.disabled =
-      true;
-
-    captureButton.disabled =
-      true;
-
-    retakeButton.disabled =
-      true;
-
-
-    status.textContent =
-      t.processing;
-
-    status.className =
-      "status loading";
-
-
-    /*
-     * Populate hidden Apps Script form.
-     */
-
-    submitFirstName.value =
-      firstName.value.trim();
-
-
-    submitLastName.value =
-      lastName.value.trim();
-
-
-    submitPhotoDataUrl.value =
-      capturedPhotoDataUrl;
-
-
-    submitLang.value =
-      currentLanguage;
-
-
-    /*
-     * Record Chromebook information.
-     */
-
-    submitDevice.value =
-      navigator.userAgent;
-
-
-    /*
-     * Submit to Apps Script.
-     */
-
-    submitForm.submit();
-
-    resetTimer();
-
-  }
-);
-
-
-/* ============================================================
-   RECEIVE APPS SCRIPT RESPONSE
-   ============================================================ */
-
-window.addEventListener(
-  "message",
-  async function(event) {
-
-    /*
-     * Apps Script returns a JSON string
-     * through window.parent.postMessage().
-     */
-
-    let response = null;
-
-
-    try {
-
-      if (
-        typeof event.data === "string"
-      ) {
-
-        response =
-          JSON.parse(event.data);
-
-      } else if (
-        event.data &&
-        typeof event.data === "object"
-      ) {
-
-        response =
-          event.data;
-
-      }
-
-    } catch (error) {
-
-      console.error(
-        "Could not parse Apps Script response:",
-        error
-      );
-
-      return;
-
-    }
-
-
-    if (!response) {
-      return;
-    }
-
-
-    if (!response.ok) {
-
-      const t =
-        translations[currentLanguage];
-
-
-      status.textContent =
-        response.error ||
-        t.error;
-
-      status.className =
-        "status error";
-
-
-      submitButton.disabled =
-        false;
-
-      captureButton.disabled =
-        false;
-
-      retakeButton.disabled =
-        false;
-
-
-      return;
-    }
-
-
-    /*
-     * We have successfully:
-     *
-     * 1. Saved the photo
-     * 2. Created the badge PDF
-     * 3. Logged the visitor
-     *
-     * Now print the badge.
-     */
-
-    await printBadge(
-      response.badgeHtml
-    );
-
-  }
-);
-
-
-/* ============================================================
-   PRINT BADGE
-   ============================================================ */
-
-async function printBadge(
-  badgeHtml
-) {
-
-  const t =
-    translations[currentLanguage];
-
-
-  status.textContent =
-    t.printing;
-
-  status.className =
-    "status loading";
-
-
-  if (!badgeHtml) {
-
-    status.textContent =
-      t.error;
-
-    status.className =
-      "status error";
-
-    return;
-  }
-
-
-  /*
-   * Create an invisible print iframe.
-   *
-   * This keeps the visitor kiosk page itself
-   * visible while the badge is printed.
-   */
-
-  const printFrame =
-    document.createElement(
-      "iframe"
-    );
-
-
-  printFrame.style.position =
-    "fixed";
-
-  printFrame.style.right =
-    "0";
-
-  printFrame.style.bottom =
-    "0";
-
-  printFrame.style.width =
-    "0";
-
-  printFrame.style.height =
-    "0";
-
-  printFrame.style.border =
-    "0";
-
-  printFrame.style.opacity =
-    "0";
-
-
-  document.body.appendChild(
-    printFrame
-  );
-
-
-  /*
-   * Wait for the iframe document to become available.
-   */
-
-  const printDocument =
-    printFrame.contentWindow.document;
-
-
-  printDocument.open();
-
-  printDocument.write(
-    badgeHtml
-  );
-
-  printDocument.close();
-
-
-  /*
-   * Wait for the badge image to load.
-   *
-   * The image is a data URL, but we still
-   * give Chrome a moment to finish layout.
-   */
-
-  await new Promise(
-    resolve => setTimeout(
-      resolve,
-      500
-    )
-  );
-
-
-  /*
-   * Print.
-   *
-   * With ChromeOS SilentPrintingEnabled enabled,
-   * Chrome should immediately send this to the
-   * default printer instead of displaying
-   * print preview.
-   */
-
   try {
-
-    printFrame.contentWindow.focus();
-
-    printFrame.contentWindow.print();
-
-  } catch (error) {
-
-    console.error(
-      "Print error:",
-      error
-    );
-
-    status.textContent =
-      t.error;
-
-    status.className =
-      "status error";
-
-
-    document.body.removeChild(
-      printFrame
-    );
-
-    submitButton.disabled =
-      false;
-
-    captureButton.disabled =
-      false;
-
-    retakeButton.disabled =
-      false;
-
-    return;
+    await printBadge(response.badgeHtml);
+    show(t().complete,'success');
+    completionHandle=setTimeout(resetKiosk,4500);
+  } catch (err) {
+    console.error('Print failed:',err);
+    show(t().error + ' Your check-in may already be saved.','error');
+    submitting=false; lockForm(false); resetInactivityTimer();
   }
+});
 
-
-  /*
-   * Give Chrome time to hand the job
-   * to the printing system.
-   */
-
-  setTimeout(
-    () => {
-
-      try {
-
-        document.body.removeChild(
-          printFrame
-        );
-
-      } catch (error) {
-
-        console.log(
-          "Print iframe cleanup:",
-          error
-        );
-
-      }
-
-    },
-    3000
-  );
-
-
-  /*
-   * Tell visitor the process is complete.
-   */
-
-  status.textContent =
-    t.complete;
-
-  status.className =
-    "status success";
-
-
-  /*
-   * Reset kiosk after a short delay.
-   */
-
-  setTimeout(
-    resetKiosk,
-    2500
-  );
-
+async function printBadge(html) {
+  if (typeof html!=='string' || !html.includes('class="badge"')) throw new Error('Badge HTML missing');
+  show(t().printing,'loading');
+  const frame=document.createElement('iframe');
+  frame.id='printFrame'; frame.title='Visitor badge to print';
+  document.body.appendChild(frame);
+  try {
+    const doc=frame.contentDocument;
+    doc.open(); doc.write(html); doc.close();
+    await Promise.race([
+      Promise.all(Array.from(doc.images).map(img=>img.decode?img.decode().catch(()=>{}):Promise.resolve())),
+      new Promise(resolve=>setTimeout(resolve,1800))
+    ]);
+    if (doc.fonts && doc.fonts.ready) await doc.fonts.ready;
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    frame.contentWindow.focus();
+    frame.contentWindow.print();
+    // ChromeOS doesn't expose a reliable print-success event to webpages.
+    await new Promise(resolve=>setTimeout(resolve,3000));
+  } finally {
+    frame.remove();
+  }
 }
-
-
-/* ============================================================
-   RESET KIOSK
-   ============================================================ */
 
 function resetKiosk() {
-
-  visitorForm.reset();
-
-  capturedPhotoDataUrl =
-    "";
-
-
-  photoPreview.src = "";
-
-  photoPreview.style.display =
-    "none";
-
-
-  video.style.display =
-    "block";
-
-
-  captureButton.classList.remove(
-    "hidden"
-  );
-
-
-  retakeButton.classList.add(
-    "hidden"
-  );
-
-
-  submitButton.disabled =
-    false;
-
-  captureButton.disabled =
-    false;
-
-  retakeButton.disabled =
-    false;
-
-
-  status.textContent =
-    "";
-
-
-  startCamera();
-
-  resetTimer();
-
+  if (submitting && !completionHandle) return;
+  submitting=false; clearTimeout(requestTimeoutHandle); clearTimeout(completionHandle);
+  visitorForm.reset(); photoDataUrl=''; preview.removeAttribute('src');
+  preview.style.display='none'; video.style.display='block';
+  captureButton.classList.remove('hidden'); retakeButton.classList.add('hidden');
+  lockForm(false); setLanguage('en'); show(''); startCamera(); resetInactivityTimer();
 }
-
-
-/* ============================================================
-   INACTIVITY RESET
-   ============================================================ */
-
-let resetTimerHandle = null;
-
-
-function resetTimer() {
-
-  clearTimeout(
-    resetTimerHandle
-  );
-
-
-  resetTimerHandle =
-    setTimeout(
-      () => {
-
-        /*
-         * Only reset if the form has
-         * actually been abandoned.
-         */
-
-        if (
-          !firstName.value &&
-          !lastName.value &&
-          !capturedPhotoDataUrl
-        ) {
-
-          return;
-
-        }
-
-
-        resetKiosk();
-
-      },
-      RESET_TIME
-    );
-
+function resetInactivityTimer() {
+  if (submitting) return;
+  clearTimeout(resetHandle);
+  resetHandle=setTimeout(()=>{
+    if (firstName.value || lastName.value || photoDataUrl || lang!=='en') resetKiosk();
+  },RESET_TIME_MS);
 }
-
-
-/* ============================================================
-   USER ACTIVITY
-   ============================================================ */
-
-[
-  "click",
-  "touchstart",
-  "keydown",
-  "input"
-].forEach(
-  eventName => {
-
-    document.addEventListener(
-      eventName,
-      resetTimer,
-      {
-        passive: true
-      }
-    );
-
-  }
-);
-
-
-/* ============================================================
-   INITIALIZE
-   ============================================================ */
-
-setLanguage("en");
-
+['click','touchstart','keydown','input'].forEach(name=>
+  document.addEventListener(name,resetInactivityTimer,{passive:true}));
+setLanguage('en');
 startCamera();
+resetInactivityTimer();
 
-resetTimer();
-
-
+// Optional printer-only diagnostic without creating a Sheet/Drive visitor entry.
+// Open the kiosk page with ?printtest=1 and click the test button.
+if (new URLSearchParams(location.search).get('printtest')==='1') {
+  const test=document.createElement('button');
+  test.type='button'; test.textContent='Print 29 × 90.3 mm test label';
+  test.style.cssText='display:block;margin:14px auto;background:#555;color:white';
+  document.querySelector('.card').appendChild(test);
+  test.addEventListener('click',async()=>{
+    test.disabled=true;
+    const testHtml=`<!doctype html><html><head><style>
+      @page{size:90.3mm 29mm;margin:0}html,body{margin:0;width:90.3mm;height:29mm;overflow:hidden}
+      body{font:700 15pt Arial;box-sizing:border-box;padding:4mm}
+      small{display:block;font:9pt Arial;margin-top:2mm}
+      </style></head><body>VISITOR PRINT TEST<small>DK-1201 · 90.3 × 29 mm</small></body></html>`;
+    try {
+      show('Sending test label...','loading');
+      // Same printing procedure; no visitor is submitted.
+      const f=document.createElement('iframe'); f.id='printFrame'; document.body.appendChild(f);
+      f.contentDocument.open(); f.contentDocument.write(testHtml); f.contentDocument.close();
+      await new Promise(resolve=>setTimeout(resolve,400));
+      f.contentWindow.focus(); f.contentWindow.print();
+      await new Promise(resolve=>setTimeout(resolve,3000));
+      f.remove(); show('Test print command sent. Check the printer.','success');
+    } catch(err) { console.error(err); show('Test print failed.','error'); }
+    test.disabled=false;
+  });
+}
 </script>
-
 </body>
-
 </html>
