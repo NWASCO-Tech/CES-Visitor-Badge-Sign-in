@@ -67,6 +67,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <input type="hidden" name="photoDataUrl" id="submitPhotoDataUrl">
   <input type="hidden" name="device" id="submitDevice">
   <input type="hidden" name="lang" id="submitLang">
+  <input type="hidden" name="requestId" id="submitRequestId">
 </form>
 
 <script>
@@ -118,6 +119,7 @@ let resetHandle = null;
 let requestTimeoutHandle = null;
 let completionHandle = null;
 let printWindow = null;
+let activeRequestId = null;
 let lastBadgeHtml = '';
 const PRINT_WINDOW_NAME = 'visitor_badge_print';
 
@@ -191,6 +193,9 @@ visitorForm.addEventListener('submit', event=>{
   if (!lastName.value.trim()) { lastName.focus(); return; }
   if (!photoDataUrl) { show(t().needPhoto,'error'); return; }
   printWindow = openPrintWindow();
+  activeRequestId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+    ? crypto.randomUUID() : String(Date.now()) + '-' + Math.random().toString(36).slice(2);
+  $('submitRequestId').value=activeRequestId;
   submitting=true; clearTimeout(resetHandle); clearTimeout(completionHandle);
   lockForm(true); show(t().processing,'loading');
   $('submitFirstName').value=firstName.value.trim();
@@ -200,33 +205,37 @@ visitorForm.addEventListener('submit', event=>{
   $('submitLang').value=lang;
   requestTimeoutHandle=setTimeout(()=>{
     // Do not automatically resubmit: the backend may already have saved the visitor.
-    submitting=false; lockForm(false); show(t().timeout,'error'); resetInactivityTimer();
+    submitting=false; activeRequestId=null; lockForm(false); show(t().timeout,'error'); resetInactivityTimer();
   },SUBMISSION_TIMEOUT_MS);
   submitForm.submit();
 });
 
 window.addEventListener('message',async event=>{
-  // A reply must come from the specific iframe used to submit this form.
-  if (event.source !== submitFrame.contentWindow || !submitting) return;
-  // Apps Script may serve HTML through googleusercontent.com after redirects.
-  if (!/^https:\/\/(?:[a-z0-9-]+\.)*(?:googleusercontent\.com|google\.com)$/.test(event.origin)) return;
+  // Apps Script can embed its response within additional Google-owned iframes.
+  // Do NOT require event.source === submitFrame.contentWindow; that can discard
+  // legitimate responses. Match the unpredictable request ID instead.
+  if (!submitting) return;
+  if (event.origin !== 'null' &&
+      !/^https:\/\/(?:[a-z0-9-]+\.)*(?:googleusercontent\.com|google\.com)$/.test(event.origin)) return;
   let response;
   try { response=typeof event.data==='string'?JSON.parse(event.data):event.data; } catch (_) { return; }
-  if (!response || response.type!=='visitor-kiosk-result' || typeof response.ok!=='boolean') return;
+  if (!response || response.type!=='visitor-kiosk-result' ||
+      response.requestId !== activeRequestId || typeof response.ok!=='boolean') return;
   clearTimeout(requestTimeoutHandle);
   if (!response.ok) {
-    submitting=false; lockForm(false); show(response.error||t().error,'error'); resetInactivityTimer(); return;
+    submitting=false; activeRequestId=null; lockForm(false); show(response.error||t().error,'error'); resetInactivityTimer(); return;
   }
   try {
+    show('Visitor saved. Preparing print window…','loading');
     lastBadgeHtml = response.badgeHtml;
     $('reprintButton').classList.remove('hidden');
     await printBadge(response.badgeHtml, printWindow);
-    show('Check-in saved. Print request opened; verify the badge printed.','success');
+    show('Check-in saved. Print command sent; check the printer queue.','success');
     completionHandle=setTimeout(resetKiosk,4500);
   } catch (err) {
     console.error('Print failed:',err);
     show(t().error + ' Your check-in may already be saved.','error');
-    submitting=false; lockForm(false); resetInactivityTimer();
+    submitting=false; activeRequestId=null; lockForm(false); resetInactivityTimer();
   }
 });
 
@@ -283,7 +292,7 @@ $('testPrintButton').addEventListener('click',async()=>{
 
 function resetKiosk() {
   if (submitting && !completionHandle) return;
-  submitting=false; clearTimeout(requestTimeoutHandle); clearTimeout(completionHandle);
+  submitting=false; activeRequestId=null; clearTimeout(requestTimeoutHandle); clearTimeout(completionHandle);
   lastBadgeHtml=''; $('reprintButton').classList.add('hidden');
   visitorForm.reset(); photoDataUrl=''; preview.removeAttribute('src');
   preview.style.display='none'; video.style.display='block';
